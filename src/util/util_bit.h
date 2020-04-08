@@ -41,12 +41,16 @@ namespace dxvk::bit {
   }
   
   inline uint32_t popcnt(uint32_t n) {
+    #if defined(__GNUC__) || defined(__clang__)
+    return __builtin_popcount(n);
+    #else
     n = popcntStep(n, 0x55555555, 1);
     n = popcntStep(n, 0x33333333, 2);
     n = popcntStep(n, 0x0F0F0F0F, 4);
     n = popcntStep(n, 0x00FF00FF, 8);
     n = popcntStep(n, 0x0000FFFF, 16);
     return n;
+    #endif
   }
   
   inline uint32_t tzcnt(uint32_t n) {
@@ -55,15 +59,7 @@ namespace dxvk::bit {
     #elif defined(__BMI__)
     return __tzcnt_u32(n);
     #elif defined(__GNUC__) || defined(__clang__)
-    uint32_t res;
-    uint32_t tmp;
-    asm (
-      "mov  $32, %1;"
-      "bsf   %2, %0;"
-      "cmovz %1, %0;"
-      : "=&r" (res), "=&r" (tmp)
-      : "r" (n));
-    return res;
+    return n != 0 ? __builtin_ctz(n) : 32;
     #else
     uint32_t r = 31;
     n &= -n;
