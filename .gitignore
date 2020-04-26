@@ -1,0 +1,7 @@
+build64/
+build32/
+.vscode/
+CMakeUserPresets.json
+out/
+.vs/
+/CMakeSettings.json
