@@ -1,0 +1,53 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "win32",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build32",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_UNITY_BUILD": "ON",
+                "CMAKE_UNITY_BUILD_BATCH_SIZE": "24",
+                "LTO": "ON",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/x32"
+            }
+        },
+        {
+            "name": "win64",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_UNITY_BUILD": "ON",
+                "CMAKE_UNITY_BUILD_BATCH_SIZE": "24",
+                "LTO": "ON",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/x64"
+            }
+        },
+        {
+            "name": "win32-non-unity",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build32",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_UNITY_BUILD": "OFF",
+                "CMAKE_UNITY_BUILD_BATCH_SIZE": "24",
+                "LTO": "ON",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/x32"
+            }
+        },
+        {
+            "name": "win64-non-unity",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build64",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_UNITY_BUILD": "OFF",
+                "CMAKE_UNITY_BUILD_BATCH_SIZE": "24",
+                "LTO": "ON",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/x64"
+            }
+        }
+    ]
+}
