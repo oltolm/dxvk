@@ -92,14 +92,15 @@ namespace dxvk {
       return DxvkNameSet();
     }
 
-    std::vector<char> extensionList(len);
+    std::string extensionList;
+    extensionList.resize(len);
     res = g_winexrFunctions.__wineopenxr_GetVulkanInstanceExtensions(len, &len, &extensionList[0]);
     if (res != 0) {
       Logger::warn("OpenXR: Unable to get required Vulkan instance extensions");
       return DxvkNameSet();
     }
 
-    return parseExtensionList(std::string(extensionList.data(), len));
+    return parseExtensionList(extensionList);
   }
   
   
@@ -113,14 +114,15 @@ namespace dxvk {
       return DxvkNameSet();
     }
 
-    std::vector<char> extensionList(len);
+    std::string extensionList;
+    extensionList.resize(len);
     res = g_winexrFunctions.__wineopenxr_GetVulkanDeviceExtensions(len, &len, &extensionList[0]);
     if (res != 0) {
       Logger::warn("OpenXR: Unable to get required Vulkan Device extensions");
       return DxvkNameSet();
     }
 
-    return parseExtensionList(std::string(extensionList.data(), len));
+    return parseExtensionList(extensionList);
   }
   
   

@@ -260,29 +260,30 @@ namespace dxvk {
     // Bump our frame id.
     ++m_frameId;
     
-    for (uint32_t i = 0; i < SyncInterval || i < 1; i++) {
+    for (uint32_t i = 0; i < std::max(SyncInterval, 1u); i++) {
       SynchronizePresent();
 
       if (!m_presenter->hasSwapChain())
         return DXGI_STATUS_OCCLUDED;
 
       // Presentation semaphores and WSI swap chain image
-      vk::PresenterInfo info = m_presenter->info();
+      vk::PresenterInfo info;
       vk::PresenterSync sync;
 
       uint32_t imageIndex = 0;
 
-      VkResult status = m_presenter->acquireNextImage(sync, imageIndex);
+      do {
+        info = m_presenter->info();
+        VkResult status = m_presenter->acquireNextImage(sync, imageIndex);
 
-      while (status != VK_SUCCESS && status != VK_SUBOPTIMAL_KHR) {
+        if (status == VK_SUCCESS || status == VK_SUBOPTIMAL_KHR)
+          break;
+
         RecreateSwapChain(m_vsync);
 
         if (!m_presenter->hasSwapChain())
           return DXGI_STATUS_OCCLUDED;
-        
-        info = m_presenter->info();
-        status = m_presenter->acquireNextImage(sync, imageIndex);
-      }
+      } while (true);
 
       // Resolve back buffer if it is multisampled. We
       // only have to do it only for the first frame.

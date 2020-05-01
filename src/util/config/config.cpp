@@ -545,7 +545,7 @@ namespace dxvk {
     auto iter = m_options.find(option);
 
     return iter != m_options.end()
-      ? iter->second : std::string();
+      ? iter->second : "";
   }
 
 

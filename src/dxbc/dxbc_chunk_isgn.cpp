@@ -39,9 +39,9 @@ namespace dxvk {
   
   
   const DxbcSgnEntry* DxbcIsgn::findByRegister(uint32_t registerId) const {
-    for (auto e = this->begin(); e != this->end(); e++) {
-      if (e->registerId == registerId)
-        return &(*e);
+    for (const auto& e : *this) {
+      if (e.registerId == registerId)
+        return &e;
     }
     
     return nullptr;
@@ -52,11 +52,11 @@ namespace dxvk {
     const std::string& semanticName,
           uint32_t     semanticIndex,
           uint32_t     streamId) const {
-    for (auto e = this->begin(); e != this->end(); e++) {
-      if (e->semanticIndex == semanticIndex
-       && e->streamId      == streamId
-       && compareSemanticNames(semanticName, e->semanticName))
-        return &(*e);
+    for (const auto& e : *this) {
+      if (e.semanticIndex == semanticIndex
+       && e.streamId      == streamId
+       && compareSemanticNames(semanticName, e.semanticName))
+        return &e;
     }
     
     return nullptr;
@@ -67,9 +67,9 @@ namespace dxvk {
           uint32_t     registerId) const {
     DxbcRegMask mask;
 
-    for (auto e = this->begin(); e != this->end(); e++) {
-      if (e->registerId == registerId)
-        mask |= e->componentMask;
+    for (const auto& e : *this) {
+      if (e.registerId == registerId)
+        mask |= e.componentMask;
     }
 
     return mask;
@@ -78,21 +78,21 @@ namespace dxvk {
 
   uint32_t DxbcIsgn::maxRegisterCount() const {
     uint32_t result = 0;
-    for (auto e = this->begin(); e != this->end(); e++)
-      result = std::max(result, e->registerId + 1);
+    for (const auto& e : *this)
+      result = std::max(result, e.registerId + 1);
     return result;
   }
 
   void DxbcIsgn::printEntries() const {
-    for (auto entry = this->begin(); entry != this->end(); entry++) {
+    for (const auto& entry : *this) {
           Logger::debug(str::format("SGN Entry:\n\t",
-            "semanticName: ",  entry->semanticName, "\n\t",
-            "semanticIndex: ", entry->semanticIndex, "\n\t",
-            "registerId: ",    entry->registerId, "\n\t",
-            "componentMask: ", entry->componentMask.maskString(), "\n\t",
-            "componentType: ", entry->componentType, "\n\t",
-            "systemValue: ",   entry->systemValue, "\n\t",
-            "streamId: ",      entry->streamId, "\n",
+            "semanticName: ",  entry.semanticName, "\n\t",
+            "semanticIndex: ", entry.semanticIndex, "\n\t",
+            "registerId: ",    entry.registerId, "\n\t",
+            "componentMask: ", entry.componentMask.maskString(), "\n\t",
+            "componentType: ", entry.componentType, "\n\t",
+            "systemValue: ",   entry.systemValue, "\n\t",
+            "streamId: ",      entry.streamId, "\n",
             "\n"));
     }
   }

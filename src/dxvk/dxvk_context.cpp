@@ -516,10 +516,10 @@ namespace dxvk {
       auto elementSize = formatInfo->elementSize;
 
       if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-        auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-        extent.width  /= plane->blockSize.width;
-        extent.height /= plane->blockSize.height;
-        elementSize = plane->elementSize;
+        const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+        extent.width  /= plane.blockSize.width;
+        extent.height /= plane.blockSize.height;
+        elementSize = plane.elementSize;
       }
 
       // Allocate enough staging buffer memory to fit one
@@ -535,9 +535,9 @@ namespace dxvk {
         VkExtent3D extent = image->mipLevelExtent(subresources.baseMipLevel + level);
 
         if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-          auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-          extent.width  /= plane->blockSize.width;
-          extent.height /= plane->blockSize.height;
+          const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+          extent.width  /= plane.blockSize.width;
+          extent.height /= plane.blockSize.height;
         }
 
         for (uint32_t layer = 0; layer < subresources.layerCount; layer++) {
@@ -2917,12 +2917,12 @@ namespace dxvk {
         copyRegion.imageExtent = imageExtent;
 
         if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-          auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-          copyRegion.imageOffset.x /= plane->blockSize.width;
-          copyRegion.imageOffset.y /= plane->blockSize.height;
-          copyRegion.imageExtent.width  /= plane->blockSize.width;
-          copyRegion.imageExtent.height /= plane->blockSize.height;
-          elementSize = plane->elementSize;
+          const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+          copyRegion.imageOffset.x /= plane.blockSize.width;
+          copyRegion.imageOffset.y /= plane.blockSize.height;
+          copyRegion.imageExtent.width  /= plane.blockSize.width;
+          copyRegion.imageExtent.height /= plane.blockSize.height;
+          elementSize = plane.elementSize;
         }
 
         // Vulkan can't really express row pitch in the same way that client APIs
@@ -2988,10 +2988,10 @@ namespace dxvk {
         VkDeviceSize elementSize = formatInfo->elementSize;
 
         if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-          auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-          extent.width  /= plane->blockSize.width;
-          extent.height /= plane->blockSize.height;
-          elementSize = plane->elementSize;
+          const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+          extent.width  /= plane.blockSize.width;
+          extent.height /= plane.blockSize.height;
+          elementSize = plane.elementSize;
         }
 
         auto blockCount = util::computeBlockCount(extent, formatInfo->blockSize);
@@ -3263,13 +3263,13 @@ namespace dxvk {
       imageRegion.extent         = extent;
 
       if (dstFormatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-        auto plane = &dstFormatInfo->planes[vk::getPlaneIndex(aspect)];
-        imageRegion.srcOffset.x /= plane->blockSize.width;
-        imageRegion.srcOffset.y /= plane->blockSize.height;
-        imageRegion.dstOffset.x /= plane->blockSize.width;
-        imageRegion.dstOffset.y /= plane->blockSize.height;
-        imageRegion.extent.width  /= plane->blockSize.width;
-        imageRegion.extent.height /= plane->blockSize.height;
+        const auto& plane = dstFormatInfo->planes[vk::getPlaneIndex(aspect)];
+        imageRegion.srcOffset.x /= plane.blockSize.width;
+        imageRegion.srcOffset.y /= plane.blockSize.height;
+        imageRegion.dstOffset.x /= plane.blockSize.width;
+        imageRegion.dstOffset.y /= plane.blockSize.height;
+        imageRegion.extent.width  /= plane.blockSize.width;
+        imageRegion.extent.height /= plane.blockSize.height;
       }
 
       m_cmd->cmdCopyImage(DxvkCmdBuffer::ExecBuffer,

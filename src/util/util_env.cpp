@@ -44,7 +44,7 @@ namespace dxvk::env {
 
 
   std::string getExeBaseName() {
-    auto exeName = getExeName();
+    auto exeName = getExeName().string();
     auto extp = matchFileExtension(exeName, "exe");
 
     if (extp != std::string::npos)
@@ -72,9 +72,8 @@ namespace dxvk::env {
       ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "SetThreadDescription"));
 
     if (proc != nullptr) {
-      auto wideName = std::vector<WCHAR>(name.length() + 1);
-      str::tows(name.c_str(), wideName.data(), wideName.size());
-      (*proc)(::GetCurrentThread(), wideName.data());
+      auto wideName = str::tows(name.c_str());
+      (*proc)(::GetCurrentThread(), wideName.c_str());
     }
   }
 

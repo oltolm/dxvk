@@ -1,5 +1,6 @@
 #include "dxgi_factory.h"
 #include "dxgi_include.h"
+#include <winerror.h>
 
 namespace dxvk {
   
@@ -39,7 +40,7 @@ extern "C" {
     static bool enabled = false;
 
     if (std::exchange(enabled, true))
-      return 0x887a0036; // DXGI_ERROR_ALREADY_EXISTS;
+      return DXGI_ERROR_ALREADY_EXISTS;
 
     dxvk::Logger::warn("DXGIDeclareAdapterRemovalSupport: Stub");
     return S_OK;

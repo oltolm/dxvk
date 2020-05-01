@@ -2538,7 +2538,7 @@ namespace dxvk {
 
       if (iter == m_fvfTable.end()) {
         decl = new D3D9VertexDecl(this, FVF);
-        m_fvfTable.insert(std::make_pair(FVF, decl));
+        m_fvfTable.insert({ FVF, decl });
       }
       else
         decl = iter->second.ptr();
@@ -2619,11 +2619,9 @@ namespace dxvk {
     if (unlikely(ppDecl == nullptr || pVertexElements == nullptr))
       return D3DERR_INVALIDCALL;
 
-    const D3DVERTEXELEMENT9* counter = pVertexElements;
-    while (counter->Stream != 0xFF)
-      counter++;
-
-    const uint32_t declCount = uint32_t(counter - pVertexElements);
+    uint32_t declCount = 0;
+    for (size_t i = 0; pVertexElements[i].Stream != 0xFF; i++)
+      declCount++;
 
     try {
       const Com<D3D9VertexDecl> decl = new D3D9VertexDecl(this, pVertexElements, declCount);
@@ -2695,7 +2693,7 @@ namespace dxvk {
 
     if (iter == m_fvfTable.end()) {
       decl = new D3D9VertexDecl(this, FVF);
-      m_fvfTable.insert(std::make_pair(FVF, decl));
+      m_fvfTable.insert({ FVF, decl });
     }
     else
       decl = iter->second.ptr();
@@ -5705,7 +5703,7 @@ namespace dxvk {
 
         m_samplerCount++;
 
-        m_samplers.insert(std::make_pair(cKey, pair));
+        m_samplers.insert({ cKey, pair });
         ctx->bindResourceSampler(cColorSlot, pair.color);
         ctx->bindResourceSampler(cDepthSlot, pair.depth);
       }
@@ -6084,6 +6082,7 @@ namespace dxvk {
 
             if (binding.binding == bindingId) {
               bindingDefined = true;
+              break;
             }
           }
 
@@ -6555,10 +6554,8 @@ namespace dxvk {
         ctx->invalidateBuffer(cBuffer, cSlice);
       });
 
-      auto& rs = m_state.renderStates;
-
       D3D9FixedFunctionPS* data = reinterpret_cast<D3D9FixedFunctionPS*>(slice.mapPtr);
-      DecodeD3DCOLOR((D3DCOLOR)rs[D3DRS_TEXTUREFACTOR], data->textureFactor.data);
+      DecodeD3DCOLOR(m_state.renderStates[D3DRS_TEXTUREFACTOR], data->textureFactor.data);
     }
   }
 
@@ -6959,9 +6956,8 @@ namespace dxvk {
       });
     }
 
-    auto& ss = m_state.samplerStates;
-    for (uint32_t i = 0; i < ss.size(); i++) {
-      auto& state = ss[i];
+    for (uint32_t i = 0; i < m_state.samplerStates.size(); i++) {
+      auto& state = m_state.samplerStates[i];
       state[D3DSAMP_ADDRESSU]      = D3DTADDRESS_WRAP;
       state[D3DSAMP_ADDRESSV]      = D3DTADDRESS_WRAP;
       state[D3DSAMP_ADDRESSW]      = D3DTADDRESS_WRAP;

@@ -28,11 +28,9 @@ namespace dxvk {
     const std::filesystem::path dumpPath = env::getEnvVar(L"DXVK_SHADER_DUMP_PATH");
     
     if (!dumpPath.empty()) {
-      DxsoReader reader(
-        reinterpret_cast<const char*>(pShaderBytecode));
-
-      reader.store(std::ofstream(str::tows(str::format(dumpPath, "/", name, ".dxso").c_str()).c_str(),
-        std::ios_base::binary | std::ios_base::trunc), bytecodeLength);
+      std::ofstream shaderOut(dumpPath / (name + ".dxso"),
+        std::ios_base::binary | std::ios_base::trunc);
+      shaderOut.write(static_cast<const char*>(pShaderBytecode), bytecodeLength);
 
       char comment[2048];
       Com<ID3DBlob> blob;
@@ -114,9 +112,10 @@ namespace dxvk {
 
     DxsoAnalysisInfo info = module.analyze();
 
-    DxvkShaderKey lookupKey = DxvkShaderKey(
-      ShaderStage,
-      Sha1Hash::compute(pShaderBytecode, info.bytecodeByteLength));
+    Sha1Hash hash = Sha1Hash::compute(
+      pShaderBytecode, info.bytecodeByteLength);
+
+    DxvkShaderKey lookupKey = DxvkShaderKey(ShaderStage, std::move(hash));
 
     // Use the shader's unique key for the lookup
     { std::lock_guard<dxvk::mutex> lock(m_mutex);
@@ -130,7 +129,7 @@ namespace dxvk {
     
     // This shader has not been compiled yet, so we have to create a
     // new module. This takes a while, so we won't lock the structure.
-    *pShaderModule = D3D9CommonShader(
+    D3D9CommonShader commonShader(
       pDevice, ShaderStage, lookupKey,
       pDxbcModuleInfo, pShaderBytecode,
       info, &module);
@@ -140,11 +139,9 @@ namespace dxvk {
     // that object instead and discard the newly created module.
     { std::lock_guard<dxvk::mutex> lock(m_mutex);
       
-      auto status = m_modules.insert({ lookupKey, *pShaderModule });
-      if (!status.second) {
-        *pShaderModule = status.first->second;
-        return;
-      }
+      auto status = m_modules.emplace(lookupKey, std::move(commonShader));
+      *pShaderModule = status.first->second;
+      return;
     }
   }
 

@@ -137,42 +137,42 @@ namespace dxvk {
     const uint32_t numRenderTargets = pDesc->IndependentBlendEnable ? 8 : 1;
     
     for (uint32_t i = 0; i < numRenderTargets; i++) {
-      D3D11_RENDER_TARGET_BLEND_DESC1* rt = &pDesc->RenderTarget[i];
+      D3D11_RENDER_TARGET_BLEND_DESC1& rt = pDesc->RenderTarget[i];
       
-      if (rt->BlendEnable) {
-        rt->BlendEnable = TRUE;
+      if (rt.BlendEnable) {
+        rt.BlendEnable = TRUE;
         
-        if (rt->LogicOpEnable)
+        if (rt.LogicOpEnable)
           return E_INVALIDARG;
         
         if (!ValidateBlendOperations(
-         rt->SrcBlend, rt->SrcBlendAlpha,
-         rt->DestBlend, rt->DestBlendAlpha,
-         rt->BlendOp, rt->BlendOpAlpha))
+         rt.SrcBlend, rt.SrcBlendAlpha,
+         rt.DestBlend, rt.DestBlendAlpha,
+         rt.BlendOp, rt.BlendOpAlpha))
           return E_INVALIDARG;
       } else {
-        rt->SrcBlend       = D3D11_BLEND_ONE;
-        rt->DestBlend      = D3D11_BLEND_ZERO;
-        rt->BlendOp        = D3D11_BLEND_OP_ADD;
-        rt->SrcBlendAlpha  = D3D11_BLEND_ONE;
-        rt->DestBlendAlpha = D3D11_BLEND_ZERO;
-        rt->BlendOpAlpha   = D3D11_BLEND_OP_ADD;
+        rt.SrcBlend       = D3D11_BLEND_ONE;
+        rt.DestBlend      = D3D11_BLEND_ZERO;
+        rt.BlendOp        = D3D11_BLEND_OP_ADD;
+        rt.SrcBlendAlpha  = D3D11_BLEND_ONE;
+        rt.DestBlendAlpha = D3D11_BLEND_ZERO;
+        rt.BlendOpAlpha   = D3D11_BLEND_OP_ADD;
       }
       
-      if (rt->LogicOpEnable) {
-        rt->LogicOpEnable = TRUE;
+      if (rt.LogicOpEnable) {
+        rt.LogicOpEnable = TRUE;
         
         // Blending must be disabled
         // if the logic op is enabled
-        if (rt->BlendEnable
+        if (rt.BlendEnable
          || pDesc->IndependentBlendEnable
-         || !ValidateLogicOp(rt->LogicOp))
+         || !ValidateLogicOp(rt.LogicOp))
           return E_INVALIDARG;
       } else {
-        rt->LogicOp = D3D11_LOGIC_OP_NOOP;
+        rt.LogicOp = D3D11_LOGIC_OP_NOOP;
       }
       
-      if (rt->RenderTargetWriteMask > D3D11_COLOR_WRITE_ENABLE_ALL)
+      if (rt.RenderTargetWriteMask > D3D11_COLOR_WRITE_ENABLE_ALL)
         return E_INVALIDARG;
     }
     

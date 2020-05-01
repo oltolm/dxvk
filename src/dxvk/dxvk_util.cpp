@@ -93,10 +93,10 @@ namespace dxvk::util {
         auto elementSize = formatInfo->elementSize;
 
         if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-          auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-          extent.width  /= plane->blockSize.width;
-          extent.height /= plane->blockSize.height;
-          elementSize = plane->elementSize;
+          const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+          extent.width  /= plane.blockSize.width;
+          extent.height /= plane.blockSize.height;
+          elementSize = plane.elementSize;
         }
 
         auto blockCount = computeBlockCount(extent, formatInfo->blockSize);
@@ -153,10 +153,10 @@ namespace dxvk::util {
       auto planeExtent = extent;
 
       if (formatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-        auto plane = &formatInfo->planes[vk::getPlaneIndex(aspect)];
-        planeExtent.width  /= plane->blockSize.width;
-        planeExtent.height /= plane->blockSize.height;
-        elementSize = plane->elementSize;
+        const auto& plane = formatInfo->planes[vk::getPlaneIndex(aspect)];
+        planeExtent.width  /= plane.blockSize.width;
+        planeExtent.height /= plane.blockSize.height;
+        elementSize = plane.elementSize;
       }
 
       size += elementSize * flattenImageExtent(computeBlockCount(planeExtent, formatInfo->blockSize));

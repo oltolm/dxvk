@@ -97,7 +97,7 @@ namespace dxvk {
     if (path == L"none")
       return L"";
 
-    return path / (env::getExeBaseName().stem().wstring() + L"_" + base);
+    return path / (env::getExeName().stem().wstring() + L"_" + base);
   }
   
 }

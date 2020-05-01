@@ -34,8 +34,6 @@ namespace dxvk {
 
     void skip(size_t n);
 
-    void store(std::ostream&& stream, size_t size) const;
-
     const char* currentPtr() {
       return m_data + m_pos;
     }

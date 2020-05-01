@@ -316,12 +316,10 @@ namespace dxvk {
 
 
   BOOL D3D9CommonTexture::DetermineShadowState() const {
-    static std::array<D3D9Format, 3> blacklist = {
-      D3D9Format::INTZ, D3D9Format::DF16, D3D9Format::DF24
-    };
-
-    return IsDepthFormat(m_desc.Format)
-        && std::find(blacklist.begin(), blacklist.end(), m_desc.Format) == blacklist.end();
+    bool blacklisted = m_desc.Format == D3D9Format::INTZ
+      || m_desc.Format == D3D9Format::DF16
+      || m_desc.Format == D3D9Format::DF24;
+    return IsDepthFormat(m_desc.Format) && !blacklisted;
   }
 
 

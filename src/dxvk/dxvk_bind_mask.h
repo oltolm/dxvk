@@ -126,7 +126,7 @@ namespace dxvk {
     }
 
     bool operator != (const DxvkBindingSet& other) const {
-      return !this->operator == (other);
+      return !(*this == other);
     }
     
   private:

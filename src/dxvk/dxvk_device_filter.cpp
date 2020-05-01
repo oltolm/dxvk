@@ -23,7 +23,7 @@ namespace dxvk {
     }
 
     if (m_flags.test(DxvkDeviceFilterFlag::MatchDeviceName)) {
-      if (std::string(properties.deviceName).find(m_matchDeviceName) == std::string::npos)
+      if (std::string_view(properties.deviceName).find(m_matchDeviceName) == std::string_view::npos)
         return false;
     }
 

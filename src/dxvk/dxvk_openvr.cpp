@@ -141,7 +141,7 @@ namespace dxvk {
   }
 
   DxvkNameSet VrInstance::queryInstanceExtensions() const {
-    std::vector<char> extensionList;
+    std::string extensionList;
     DWORD len;
 
     if (m_vr_key)
@@ -171,12 +171,12 @@ namespace dxvk {
         extensionList.resize(len);
         len = m_compositor->GetVulkanInstanceExtensionsRequired(extensionList.data(), len);
     }
-    return parseExtensionList(std::string(extensionList.data(), len));
+    return parseExtensionList(extensionList);
   }
   
   
   DxvkNameSet VrInstance::queryDeviceExtensions(Rc<DxvkAdapter> adapter) const {
-    std::vector<char> extensionList;
+    std::string extensionList;
     DWORD len;
 
     if (m_vr_key)
@@ -208,7 +208,7 @@ namespace dxvk {
         extensionList.resize(len);
         len = m_compositor->GetVulkanDeviceExtensionsRequired(adapter->handle(), extensionList.data(), len);
     }
-    return parseExtensionList(std::string(extensionList.data(), len));
+    return parseExtensionList(extensionList);
   }
   
   

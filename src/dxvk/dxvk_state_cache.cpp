@@ -886,7 +886,7 @@ namespace dxvk {
 
 
   std::filesystem::path DxvkStateCache::getCacheFileName() const {
-    return getCacheDir() / (env::getExeBaseName().replace_extension(L".dxvk-cache"));
+    return getCacheDir() / (env::getExeName().replace_extension(L".dxvk-cache"));
   }
 
 

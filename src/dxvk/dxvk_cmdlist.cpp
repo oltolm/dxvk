@@ -123,13 +123,13 @@ namespace dxvk {
   
   
   VkResult DxvkCommandList::synchronize() {
-    VkResult status = VK_TIMEOUT;
+    VkResult status;
     
-    while (status == VK_TIMEOUT) {
+    do {
       status = m_vkd->vkWaitForFences(
         m_vkd->device(), 1, &m_fence, VK_FALSE,
         1'000'000'000ull);
-    }
+    } while (status == VK_TIMEOUT);
     
     return status;
   }

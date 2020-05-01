@@ -283,10 +283,10 @@ namespace dxvk {
           auto elementSize = packedFormatInfo->elementSize;
 
           if (packedFormatInfo->flags.test(DxvkFormatFlag::MultiPlane)) {
-            auto plane = &packedFormatInfo->planes[vk::getPlaneIndex(aspect)];
-            extent.width  /= plane->blockSize.width;
-            extent.height /= plane->blockSize.height;
-            elementSize = plane->elementSize;
+            const auto& plane = packedFormatInfo->planes[vk::getPlaneIndex(aspect)];
+            extent.width  /= plane.blockSize.width;
+            extent.height /= plane.blockSize.height;
+            elementSize = plane.elementSize;
           }
 
           auto blockCount = util::computeBlockCount(extent, packedFormatInfo->blockSize);

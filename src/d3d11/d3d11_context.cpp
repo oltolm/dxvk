@@ -810,7 +810,7 @@ namespace dxvk {
     VkImageAspectFlags  clearAspect = formatInfo->aspectMask & (VK_IMAGE_ASPECT_COLOR_BIT | VK_IMAGE_ASPECT_DEPTH_BIT);
 
     // Clear all the rectangles that are specified
-    for (uint32_t i = 0; i < NumRects || i < 1; i++) {
+    for (uint32_t i = 0; i < std::max(NumRects, 1u); i++) {
       if (pRect) {
         if (pRect[i].left >= pRect[i].right
         || pRect[i].top >= pRect[i].bottom)
@@ -4338,26 +4338,24 @@ namespace dxvk {
     }
     
     for (uint32_t i = 0; i < NumViews; i++) {
-      if (ppRenderTargetViews[i] != nullptr) {
-        auto curView = static_cast<D3D11RenderTargetView*>(
-          ppRenderTargetViews[i])->GetImageView();
-        
-        if (refView != nullptr) {
-          // Render target views must all have the same
-          // size, sample count, layer count, and type
-          if (curView->info().type      != refView->info().type
-           || curView->info().numLayers != refView->info().numLayers)
-            return false;
-          
-          if (curView->imageInfo().sampleCount
-           != refView->imageInfo().sampleCount)
-            return false;
-        } else {
-          // Set reference view. All remaining views
-          // must be compatible to the reference view.
-          refView = curView;
-        }
+      if (ppRenderTargetViews[i] == nullptr)
+        continue;
+      auto curView = static_cast<D3D11RenderTargetView*>(
+        ppRenderTargetViews[i])->GetImageView();
+      
+      if (refView == nullptr) {
+        // Set reference view. All remaining views
+        // must be compatible to the reference view.
+        refView = curView;
+        continue;
       }
+
+      // Render target views must all have the same
+      // size, sample count, layer count, and type
+      if (curView->info().type             != refView->info().type
+       || curView->info().numLayers        != refView->info().numLayers
+       || curView->imageInfo().sampleCount != refView->imageInfo().sampleCount)
+        return false;
     }
     
     return true;

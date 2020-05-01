@@ -14,7 +14,7 @@ namespace dxvk {
     return true;
   }
 
-  bool Matrix4::operator!=(const Matrix4& m2) const { return !operator==(m2); }
+  bool Matrix4::operator!=(const Matrix4& m2) const { return !(*this==m2); }
 
   Matrix4 Matrix4::operator+(const Matrix4& other) const {
     Matrix4 mat;

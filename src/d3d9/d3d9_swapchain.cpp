@@ -768,23 +768,24 @@ namespace dxvk {
     // Bump our frame id.
     ++m_frameId;
 
-    for (uint32_t i = 0; i < SyncInterval || i < 1; i++) {
+    for (uint32_t i = 0; i < std::max(SyncInterval, 1u); i++) {
       SynchronizePresent();
 
       // Presentation semaphores and WSI swap chain image
-      vk::PresenterInfo info = m_presenter->info();
+      vk::PresenterInfo info;
       vk::PresenterSync sync;
 
       uint32_t imageIndex = 0;
 
-      VkResult status = m_presenter->acquireNextImage(sync, imageIndex);
-
-      while (status != VK_SUCCESS && status != VK_SUBOPTIMAL_KHR) {
-        RecreateSwapChain(m_vsync);
-        
+      do {
         info = m_presenter->info();
-        status = m_presenter->acquireNextImage(sync, imageIndex);
-      }
+        VkResult status = m_presenter->acquireNextImage(sync, imageIndex);
+
+        if (status == VK_SUCCESS || status == VK_SUBOPTIMAL_KHR)
+          break;
+
+        RecreateSwapChain(m_vsync);
+      } while (true);
 
       m_context->beginRecording(
         m_device->createCommandList());

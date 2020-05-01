@@ -2,7 +2,7 @@
 
 namespace dxvk {
 
-  typedef HRESULT (STDMETHODCALLTYPE *D3DXDisassembleShader) (
+  using D3DXDisassembleShader = HRESULT (STDMETHODCALLTYPE *) (
     const void*      pShader, 
           BOOL       EnableColorCode, 
           char*      pComments, 

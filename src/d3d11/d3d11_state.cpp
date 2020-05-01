@@ -13,7 +13,7 @@ namespace dxvk {
     const uint32_t usedRenderTargets = desc.IndependentBlendEnable ? 8 : 1;
     
     for (uint32_t i = 0; i < usedRenderTargets; i++)
-      hash.add(this->operator () (desc.RenderTarget[i]));
+      hash.add((*this)(desc.RenderTarget[i]));
     
     return hash;
   }
@@ -39,8 +39,8 @@ namespace dxvk {
     hash.add(desc.StencilEnable);
     hash.add(desc.StencilReadMask);
     hash.add(desc.StencilWriteMask);
-    hash.add(this->operator () (desc.FrontFace));
-    hash.add(this->operator () (desc.BackFace));
+    hash.add((*this)(desc.FrontFace));
+    hash.add((*this)(desc.BackFace));
     return hash;
   }
   
@@ -136,8 +136,8 @@ namespace dxvk {
         && a.StencilEnable         == b.StencilEnable
         && a.StencilReadMask       == b.StencilReadMask
         && a.StencilWriteMask      == b.StencilWriteMask
-        && this->operator () (a.FrontFace, b.FrontFace)
-        && this->operator () (a.BackFace, b.BackFace);
+        && (*this)(a.FrontFace, b.FrontFace)
+        && (*this)(a.BackFace, b.BackFace);
   }
   
   

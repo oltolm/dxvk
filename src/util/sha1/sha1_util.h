@@ -38,7 +38,7 @@ namespace dxvk {
     }
     
     bool operator != (const Sha1Hash& other) const {
-      return !this->operator == (other);
+      return !(*this == other);
     }
     
     static Sha1Hash compute(

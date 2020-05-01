@@ -3880,13 +3880,13 @@ namespace dxvk {
     // Use the last label allocated for 'case'. The block starting
     // with that label is guaranteed to be empty unless a previous
     // 'case' block was not properly closed in the DXBC shader.
-    DxbcCfgBlockSwitch* block = &m_controlFlowBlocks.back().b_switch;
+    DxbcCfgBlockSwitch& block = m_controlFlowBlocks.back().b_switch;
     
     DxbcSwitchLabel label;
     label.desc.literal = ins.src[0].imm.u32_1;
-    label.desc.labelId = block->labelCase;
-    label.next         = block->labelCases;
-    block->labelCases = new DxbcSwitchLabel(label);
+    label.desc.labelId = block.labelCase;
+    label.next         = block.labelCases;
+    block.labelCases = new DxbcSwitchLabel(label);
   }
   
   
@@ -7043,11 +7043,9 @@ namespace dxvk {
       m_xfbVars[i].component = 0;
     }
 
-    for (uint32_t i = 0; i < m_xfbVars.size(); i++) {
-      const DxbcXfbVar* var = &m_xfbVars[i];
-
-      m_module.decorateLocation (var->varId, var->location);
-      m_module.decorateComponent(var->varId, var->component);
+    for (const DxbcXfbVar& var : m_xfbVars) {
+      m_module.decorateLocation (var.varId, var.location);
+      m_module.decorateComponent(var.varId, var.component);
     }
   }
 
@@ -7055,27 +7053,27 @@ namespace dxvk {
   void DxbcCompiler::emitXfbOutputSetup(
           uint32_t                          streamId,
           bool                              passthrough) {
-    for (size_t i = 0; i < m_xfbVars.size(); i++) {
-      if (m_xfbVars[i].streamId == streamId) {
-        DxbcRegisterPointer srcPtr = passthrough
-          ? m_vRegs[m_xfbVars[i].outputId]
-          : m_oRegs[m_xfbVars[i].outputId];
+    for (const DxbcXfbVar& var : m_xfbVars) {
+      if (var.streamId != streamId)
+        continue;
+      DxbcRegisterPointer srcPtr = passthrough
+        ? m_vRegs[var.outputId]
+        : m_oRegs[var.outputId];
 
-        if (passthrough) {
-          srcPtr = emitArrayAccess(srcPtr,
-            spv::StorageClassInput,
-            m_module.constu32(0));
-        }
-        
-        DxbcRegisterPointer dstPtr;
-        dstPtr.type.ctype  = DxbcScalarType::Float32;
-        dstPtr.type.ccount = m_xfbVars[i].dstMask.popCount();
-        dstPtr.id = m_xfbVars[i].varId;
-
-        DxbcRegisterValue value = emitRegisterExtract(
-          emitValueLoad(srcPtr), m_xfbVars[i].srcMask);
-        emitValueStore(dstPtr, value, m_xfbVars[i].dstMask);
+      if (passthrough) {
+        srcPtr = emitArrayAccess(srcPtr,
+          spv::StorageClassInput,
+          m_module.constu32(0));
       }
+      
+      DxbcRegisterPointer dstPtr;
+      dstPtr.type.ctype  = DxbcScalarType::Float32;
+      dstPtr.type.ccount = var.dstMask.popCount();
+      dstPtr.id = var.varId;
+
+      DxbcRegisterValue value = emitRegisterExtract(
+        emitValueLoad(srcPtr), var.srcMask);
+      emitValueStore(dstPtr, value, var.dstMask);
     }
   }
 
