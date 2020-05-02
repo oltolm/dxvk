@@ -175,6 +175,13 @@ namespace dxvk {
     uint32_t binding;
     VkFormat format;
     uint32_t offset;
+    
+    bool operator==(const DxvkVertexAttribute& other) const {
+      return location == other.location
+        && binding    == other.binding
+        && format     == other.format
+        && offset     == other.offset;
+    }
   };
   
   
@@ -188,6 +195,12 @@ namespace dxvk {
     uint32_t          binding;
     uint32_t          fetchRate;
     VkVertexInputRate inputRate;
+
+    bool operator==(const DxvkVertexBinding& other) const {
+      return binding == other.binding
+        && fetchRate == other.fetchRate
+        && inputRate == other.inputRate;
+    }
   };
   
   

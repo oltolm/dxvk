@@ -62,23 +62,8 @@ namespace dxvk {
   
   
   bool D3D11InputLayout::Compare(const D3D11InputLayout* pOther) const {
-    bool eq = m_attributes.size() == pOther->m_attributes.size()
-           && m_bindings.size()   == pOther->m_bindings.size();
-    
-    for (uint32_t i = 0; eq && i < m_attributes.size(); i++) {
-      eq &= m_attributes[i].location == pOther->m_attributes[i].location
-         && m_attributes[i].binding  == pOther->m_attributes[i].binding
-         && m_attributes[i].format   == pOther->m_attributes[i].format
-         && m_attributes[i].offset   == pOther->m_attributes[i].offset;
-    }
-    
-    for (uint32_t i = 0; eq && i < m_bindings.size(); i++) {
-      eq &= m_bindings[i].binding    == pOther->m_bindings[i].binding
-         && m_bindings[i].fetchRate  == pOther->m_bindings[i].fetchRate
-         && m_bindings[i].inputRate  == pOther->m_bindings[i].inputRate;
-    }
-    
-    return eq;
+    return m_attributes == pOther->m_attributes
+      && m_bindings == pOther->m_bindings;
   }
   
 }

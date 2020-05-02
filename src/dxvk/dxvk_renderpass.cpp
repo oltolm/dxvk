@@ -6,17 +6,9 @@
 namespace dxvk {
   
   bool DxvkRenderPassFormat::eq(const DxvkRenderPassFormat& fmt) const {
-    bool eq = sampleCount == fmt.sampleCount;
-    
-    for (uint32_t i = 0; i < MaxNumRenderTargets && eq; i++) {
-      eq &= color[i].format == fmt.color[i].format
-         && color[i].layout == fmt.color[i].layout;
-    }
-    
-    eq &= depth.format == fmt.depth.format
-       && depth.layout == fmt.depth.layout;
-    
-    return eq;
+    return sampleCount == fmt.sampleCount
+      && color == fmt.color
+      && depth == fmt.depth;
   }
 
 
@@ -63,7 +55,7 @@ namespace dxvk {
     std::lock_guard<sync::Spinlock> lock(m_mutex);
     
     for (const auto& i : m_instances) {
-      if (compareOps(i.ops, ops))
+      if (i.ops == ops)
         return i.handle;
     }
     
@@ -238,31 +230,6 @@ namespace dxvk {
     }
     
     return renderPass;
-  }
-  
-  
-  bool DxvkRenderPass::compareOps(
-    const DxvkRenderPassOps& a,
-    const DxvkRenderPassOps& b) {
-    bool eq = a.barrier.srcStages == b.barrier.srcStages
-           && a.barrier.srcAccess == b.barrier.srcAccess
-           && a.barrier.dstStages == b.barrier.dstStages
-           && a.barrier.dstAccess == b.barrier.dstAccess;
-    
-    if (eq) {
-      eq &= a.depthOps.loadOpD     == b.depthOps.loadOpD
-         && a.depthOps.loadOpS     == b.depthOps.loadOpS
-         && a.depthOps.loadLayout  == b.depthOps.loadLayout
-         && a.depthOps.storeLayout == b.depthOps.storeLayout;
-    }
-    
-    for (uint32_t i = 0; i < MaxNumRenderTargets && eq; i++) {
-      eq &= a.colorOps[i].loadOp      == b.colorOps[i].loadOp
-         && a.colorOps[i].loadLayout  == b.colorOps[i].loadLayout
-         && a.colorOps[i].storeLayout == b.colorOps[i].storeLayout;
-    }
-    
-    return eq;
   }
   
   

@@ -100,15 +100,7 @@ namespace dxvk {
 
   bool DxbcIsgn::compareSemanticNames(
     const std::string& a, const std::string& b) const {
-    if (a.size() != b.size())
-      return false;
-    
-    for (size_t i = 0; i < a.size(); i++) {
-      if (std::toupper(a[i]) != std::toupper(b[i]))
-        return false;
-    }
-    
-    return true;
+    return a.size() == b.size() && _stricmp(a.c_str(), b.c_str()) == 0;
   }
   
 }

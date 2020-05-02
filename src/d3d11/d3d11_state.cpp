@@ -106,17 +106,14 @@ namespace dxvk {
   bool D3D11StateDescEqual::operator () (
     const D3D11_BLEND_DESC1& a,
     const D3D11_BLEND_DESC1& b) const {
-    bool eq = a.AlphaToCoverageEnable  == b.AlphaToCoverageEnable
-           && a.IndependentBlendEnable == b.IndependentBlendEnable;
-    
     // Render targets 1 to 7 are ignored and may contain
     // undefined data if independent blend is disabled
     const uint32_t usedRenderTargets = a.IndependentBlendEnable ? 8 : 1;
-    
-    for (uint32_t i = 0; eq && (i < usedRenderTargets); i++)
-      eq &= this->operator () (a.RenderTarget[i], b.RenderTarget[i]);
-    
-    return eq;
+
+    return a.AlphaToCoverageEnable == b.AlphaToCoverageEnable
+      && a.IndependentBlendEnable == b.IndependentBlendEnable
+      && std::equal(a.RenderTarget, a.RenderTarget + usedRenderTargets,
+        b.RenderTarget, D3D11StateDescEqual());
   }
   
   

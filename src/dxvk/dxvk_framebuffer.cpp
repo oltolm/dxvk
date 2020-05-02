@@ -59,15 +59,7 @@ namespace dxvk {
   
   
   bool DxvkFramebuffer::hasTargets(const DxvkRenderTargets& renderTargets) {
-    bool eq = m_renderTargets.depth.view   == renderTargets.depth.view
-           && m_renderTargets.depth.layout == renderTargets.depth.layout;
-    
-    for (uint32_t i = 0; i < MaxNumRenderTargets && eq; i++) {
-      eq &= m_renderTargets.color[i].view   == renderTargets.color[i].view
-         && m_renderTargets.color[i].layout == renderTargets.color[i].layout;
-    }
-    
-    return eq;
+    return m_renderTargets == renderTargets;
   }
   
   

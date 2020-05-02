@@ -152,7 +152,7 @@ inline bool operator == (
 inline bool operator != (
   const VkImageSubresourceRange& a,
   const VkImageSubresourceRange& b) {
-  return !operator == (a, b);
+  return !(a == b);
 }
 
 
@@ -169,7 +169,7 @@ inline bool operator == (
 inline bool operator != (
   const VkImageSubresourceLayers& a,
   const VkImageSubresourceLayers& b) {
-  return !operator == (a, b);
+  return !(a == b);
 }
 
 

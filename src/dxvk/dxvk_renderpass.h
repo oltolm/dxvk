@@ -21,6 +21,11 @@ namespace dxvk {
   struct DxvkAttachmentFormat {
     VkFormat      format = VK_FORMAT_UNDEFINED;
     VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    bool operator==(const DxvkAttachmentFormat& other) const {
+      return format == other.format
+        && layout == other.layout;
+    }
   };
   
   
@@ -33,7 +38,7 @@ namespace dxvk {
   struct DxvkRenderPassFormat {
     VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT;
     DxvkAttachmentFormat  depth;
-    DxvkAttachmentFormat  color[MaxNumRenderTargets];
+    std::array<DxvkAttachmentFormat,MaxNumRenderTargets>  color;
     
     bool eq(const DxvkRenderPassFormat& fmt) const;
 
@@ -51,6 +56,12 @@ namespace dxvk {
     VkAttachmentLoadOp  loadOp      = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     VkImageLayout       loadLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
     VkImageLayout       storeLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+    bool operator==(const DxvkColorAttachmentOps& other) const {
+      return loadOp    == other.loadOp
+        && loadLayout  == other.loadLayout
+        && storeLayout == other.storeLayout;
+    }
   };
   
   
@@ -65,6 +76,13 @@ namespace dxvk {
     VkAttachmentLoadOp  loadOpS     = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     VkImageLayout       loadLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
     VkImageLayout       storeLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+    bool operator==(const DxvkDepthAttachmentOps& other) const {
+      return loadOpD   == other.loadOpD
+        && loadOpS     == other.loadOpS
+        && loadLayout  == other.loadLayout
+        && storeLayout == other.storeLayout;
+    }
   };
   
   
@@ -79,6 +97,13 @@ namespace dxvk {
     VkAccessFlags         srcAccess = 0;
     VkPipelineStageFlags  dstStages = 0;
     VkAccessFlags         dstAccess = 0;
+
+    bool operator==(const DxvkRenderPassBarrier& other) const {
+      return srcStages == other.srcStages
+        && srcAccess   == other.srcAccess
+        && dstStages   == other.dstStages
+        && dstAccess   == other.dstAccess;
+    }
   };
   
   
@@ -92,7 +117,13 @@ namespace dxvk {
   struct DxvkRenderPassOps {
     DxvkRenderPassBarrier  barrier;
     DxvkDepthAttachmentOps depthOps;
-    DxvkColorAttachmentOps colorOps[MaxNumRenderTargets];
+    std::array<DxvkColorAttachmentOps,MaxNumRenderTargets> colorOps;
+
+    bool operator==(const DxvkRenderPassOps& other) const {
+      return barrier == other.barrier
+        && depthOps == other.depthOps
+        && colorOps == other.colorOps;
+    }
   };
   
   
@@ -183,10 +214,6 @@ namespace dxvk {
     
     VkRenderPass createRenderPass(
       const DxvkRenderPassOps& ops);
-    
-    static bool compareOps(
-      const DxvkRenderPassOps& a,
-      const DxvkRenderPassOps& b);
     
   };
   

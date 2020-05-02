@@ -28,15 +28,8 @@ namespace dxvk {
   }
 
   bool D3D9VertexDeclEq::operator () (const D3D9VertexElements& a, const D3D9VertexElements& b) const {
-    if (a.size() != b.size())
-      return false;
-
-    bool equal = true;
-
-    for (uint32_t i = 0; i < a.size(); i++)
-      equal &= std::memcmp(&a[i], &b[i], sizeof(a[0])) == 0;
-
-    return equal;
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(),
+      [](auto& a, auto& b) { return !std::memcmp(&a, &b, sizeof(a)); });
   }
 
   enum class DecltypeClass {

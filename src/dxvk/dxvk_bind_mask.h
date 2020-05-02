@@ -122,10 +122,7 @@ namespace dxvk {
     }
 
     bool operator == (const DxvkBindingSet& other) const {
-      bool eq = true;
-      for (uint32_t i = 0; i < IntCount; i++)
-        eq &= m_slots[i] == other.m_slots[i];
-      return eq;
+      return m_slots == other.m_slots;
     }
 
     bool operator != (const DxvkBindingSet& other) const {
@@ -134,7 +131,7 @@ namespace dxvk {
     
   private:
     
-    uint32_t m_slots[IntCount];
+    std::array<uint32_t,IntCount> m_slots;
     
   };
 

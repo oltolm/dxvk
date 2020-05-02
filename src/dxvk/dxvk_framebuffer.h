@@ -28,6 +28,11 @@ namespace dxvk {
   struct DxvkAttachment {
     Rc<DxvkImageView> view    = nullptr;
     VkImageLayout     layout  = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    bool operator==(const DxvkAttachment& other) const {
+      return view == other.view
+        && layout == other.layout;
+    }
   };
   
   
@@ -39,7 +44,11 @@ namespace dxvk {
    */
   struct DxvkRenderTargets {
     DxvkAttachment depth;
-    DxvkAttachment color[MaxNumRenderTargets];
+    std::array<DxvkAttachment,MaxNumRenderTargets> color;
+
+    bool operator==(const DxvkRenderTargets& other) const {
+      return depth == other.depth && color == other.color;
+    }
   };
 
 
