@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "dxvk_state_cache_types.h"
+#include "dxvk_thread_pool.h"
 
 namespace dxvk {
 
@@ -76,7 +77,7 @@ namespace dxvk {
      * \returns \c true if we're compiling shaders
      */
     bool isCompilingShaders() {
-      return m_workerBusy.load() > 0;
+      return m_workerPool.running() > 0;
     }
 
   private:
@@ -108,16 +109,9 @@ namespace dxvk {
       DxvkShaderKey, Rc<DxvkShader>,
       DxvkHash, DxvkEq> m_shaderMap;
 
-    dxvk::mutex                       m_workerLock;
-    dxvk::condition_variable          m_workerCond;
-    std::queue<WorkerItem>            m_workerQueue;
-    std::atomic<uint32_t>             m_workerBusy;
-    std::vector<dxvk::thread>         m_workerThreads;
+    DxvkThreadPool m_workerPool;
 
-    dxvk::mutex                       m_writerLock;
-    dxvk::condition_variable          m_writerCond;
-    std::queue<WriterItem>            m_writerQueue;
-    dxvk::thread                      m_writerThread;
+    DxvkThreadPool m_writerPool{ThreadPriority::Normal, 1};
 
     DxvkShaderKey getShaderKey(
       const Rc<DxvkShader>&           shader) const;
@@ -155,7 +149,7 @@ namespace dxvk {
     
     void writeCacheEntry(
             std::ostream&             stream, 
-            DxvkStateCacheEntry&      entry) const;
+            const DxvkStateCacheEntry&      entry) const;
     
     bool convertEntryV2(
             DxvkStateCacheEntryV4&    entry) const;
@@ -172,10 +166,6 @@ namespace dxvk {
       const DxvkStateCacheEntryV6&    in,
             DxvkStateCacheEntry&      out) const;
     
-    void workerFunc();
-
-    void writerFunc();
-
     std::wstring getCacheFileName() const;
     
     std::string getCacheDir() const;

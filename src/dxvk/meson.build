@@ -105,6 +105,7 @@ dxvk_src = files([
   'dxvk_state_cache.cpp',
   'dxvk_stats.cpp',
   'dxvk_swapchain_blitter.cpp',
+  'dxvk_thread_pool.cpp',
   'dxvk_unbound.cpp',
   'dxvk_util.cpp',
 

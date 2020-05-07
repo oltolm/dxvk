@@ -154,7 +154,8 @@ namespace dxvk {
           DxvkPipelineManager*  pipeManager,
           DxvkRenderPassPool*   passManager)
   : m_pipeManager(pipeManager),
-    m_passManager(passManager) {
+    m_passManager(passManager),
+    m_workerPool(ThreadPriority::Lowest, device->config().numCompilerThreads) {
     bool newFile = !readCacheFile();
 
     if (newFile) {
@@ -184,45 +185,11 @@ namespace dxvk {
       for (auto& e : m_entries)
         writeCacheEntry(file, e);
     }
-
-    // Use half the available CPU cores for pipeline compilation
-    uint32_t numCpuCores = dxvk::thread::hardware_concurrency();
-    uint32_t numWorkers  = ((std::max(1u, numCpuCores) - 1) * 5) / 7;
-
-    if (numWorkers <  1) numWorkers =  1;
-    if (numWorkers > 32) numWorkers = 32;
-
-    if (device->config().numCompilerThreads > 0)
-      numWorkers = device->config().numCompilerThreads;
-    
-    Logger::info(str::format("DXVK: Using ", numWorkers, " compiler threads"));
-    
-    // Start the worker threads and the file writer
-    m_workerBusy.store(numWorkers);
-
-    for (uint32_t i = 0; i < numWorkers; i++) {
-      m_workerThreads.emplace_back([this] () { workerFunc(); });
-      m_workerThreads[i].set_priority(ThreadPriority::Lowest);
-    }
-    
-    m_writerThread = dxvk::thread([this] () { writerFunc(); });
   }
   
 
   DxvkStateCache::~DxvkStateCache() {
-    { std::lock_guard<dxvk::mutex> workerLock(m_workerLock);
-      std::lock_guard<dxvk::mutex> writerLock(m_writerLock);
 
-      m_stopThreads.store(true);
-
-      m_workerCond.notify_all();
-      m_writerCond.notify_all();
-    }
-
-    for (auto& worker : m_workerThreads)
-      worker.join();
-    
-    m_writerThread.join();
   }
 
 
@@ -244,12 +211,17 @@ namespace dxvk {
     }
 
     // Queue a job to write this pipeline to the cache
-    std::unique_lock<dxvk::mutex> lock(m_writerLock);
-
-    m_writerQueue.push({ shaders, state,
+    m_writerPool.enqueue([this, entry = DxvkStateCacheEntry{
+      shaders, state,
       DxvkComputePipelineStateInfo(),
-      format, g_nullHash });
-    m_writerCond.notify_one();
+      format, g_nullHash}]() {
+      env::setThreadName("dxvk-writer");
+
+      std::ofstream file = std::ofstream(getCacheFileName().c_str(),
+        std::ios_base::binary |
+        std::ios_base::app);
+      writeCacheEntry(file, entry);
+    });
   }
 
 
@@ -268,12 +240,16 @@ namespace dxvk {
     }
 
     // Queue a job to write this pipeline to the cache
-    std::unique_lock<dxvk::mutex> lock(m_writerLock);
-
-    m_writerQueue.push({ shaders,
+    m_writerPool.enqueue([this, entry = DxvkStateCacheEntry{ shaders,
       DxvkGraphicsPipelineStateInfo(), state,
-      DxvkRenderPassFormat(), g_nullHash });
-    m_writerCond.notify_one();
+      DxvkRenderPassFormat(), g_nullHash }]() {
+      env::setThreadName("dxvk-writer");
+  
+      std::ofstream file = std::ofstream(getCacheFileName().c_str(),
+        std::ios_base::binary |
+        std::ios_base::app);
+      writeCacheEntry(file, entry);
+    });
   }
 
 
@@ -286,9 +262,6 @@ namespace dxvk {
     // Add the shader so we can look it up by its key
     std::unique_lock<dxvk::mutex> entryLock(m_entryLock);
     m_shaderMap.insert({ key, shader });
-
-    // Deferred lock, don't stall workers unless we have to
-    std::unique_lock<dxvk::mutex> workerLock;
 
     auto pipelines = m_pipelineMap.equal_range(key);
 
@@ -303,14 +276,11 @@ namespace dxvk {
        || !getShaderByKey(p->second.cs,  item.cp.cs))
         continue;
       
-      if (!workerLock)
-        workerLock = std::unique_lock<dxvk::mutex>(m_workerLock);
-      
-      m_workerQueue.push(item);
+      m_workerPool.enqueue([this, item]() {
+        compilePipelines(item);
+      });
     }
 
-    if (workerLock)
-      m_workerCond.notify_all();
   }
 
 
@@ -651,7 +621,7 @@ namespace dxvk {
 
   void DxvkStateCache::writeCacheEntry(
           std::ostream&             stream, 
-          DxvkStateCacheEntry&      entry) const {
+    const DxvkStateCacheEntry&      entry) const {
     DxvkStateCacheEntryData data;
     VkShaderStageFlags stageMask = 0;
 
@@ -912,70 +882,6 @@ namespace dxvk {
     }
 
     return true;
-  }
-
-
-  void DxvkStateCache::workerFunc() {
-    env::setThreadName("dxvk-shader");
-
-    while (!m_stopThreads.load()) {
-      WorkerItem item;
-
-      { std::unique_lock<dxvk::mutex> lock(m_workerLock);
-
-        if (m_workerQueue.empty()) {
-          m_workerBusy -= 1;
-          m_workerCond.wait(lock, [this] () {
-            return m_workerQueue.size()
-                || m_stopThreads.load();
-          });
-
-          if (!m_workerQueue.empty())
-            m_workerBusy += 1;
-        }
-
-        if (m_workerQueue.empty())
-          break;
-        
-        item = m_workerQueue.front();
-        m_workerQueue.pop();
-      }
-
-      compilePipelines(item);
-    }
-  }
-
-
-  void DxvkStateCache::writerFunc() {
-    env::setThreadName("dxvk-writer");
-
-    std::ofstream file;
-
-    while (!m_stopThreads.load()) {
-      DxvkStateCacheEntry entry;
-
-      { std::unique_lock<dxvk::mutex> lock(m_writerLock);
-
-        m_writerCond.wait(lock, [this] () {
-          return m_writerQueue.size()
-              || m_stopThreads.load();
-        });
-
-        if (m_writerQueue.size() == 0)
-          break;
-
-        entry = m_writerQueue.front();
-        m_writerQueue.pop();
-      }
-
-      if (!file) {
-        file = std::ofstream(getCacheFileName().c_str(),
-          std::ios_base::binary |
-          std::ios_base::app);
-      }
-
-      writeCacheEntry(file, entry);
-    }
   }
 
 
