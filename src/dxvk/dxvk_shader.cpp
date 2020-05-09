@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "../spirv/spirv_instruction.h"
+
 namespace dxvk {
   
   DxvkShaderConstData::DxvkShaderConstData() {
@@ -196,23 +198,25 @@ namespace dxvk {
     m_code.decompress().store(outputStream);
   }
 
+  struct SpirvTypeInfo {
+    spv::Op           op            = spv::OpNop;
+    uint32_t          baseTypeId    = 0;
+    uint32_t          compositeSize = 0;
+    spv::StorageClass storageClass  = spv::StorageClassMax;
+  };
 
-  void DxvkShader::eliminateInput(SpirvCodeBuffer& code, uint32_t location) {
-    struct SpirvTypeInfo {
-      spv::Op           op            = spv::OpNop;
-      uint32_t          baseTypeId    = 0;
-      uint32_t          compositeSize = 0;
-      spv::StorageClass storageClass  = spv::StorageClassMax;
-    };
+  struct SpirvVarInfo {
+    size_t   offset = 0;
+    uint32_t typeId = 0;
+    uint32_t id  = 0;
+  };
 
-    std::unordered_map<uint32_t, SpirvTypeInfo> types;
+  SpirvVarInfo findInputVar(SpirvCodeBuffer& code, uint32_t location,
+                            std::unordered_map<uint32_t, SpirvTypeInfo>& types) {
     std::unordered_map<uint32_t, uint32_t>      constants;
     std::unordered_set<uint32_t>                candidates;
 
-    // Find the input variable in question
-    size_t   inputVarOffset = 0;
-    uint32_t inputVarTypeId = 0;
-    uint32_t inputVarId     = 0;
+    SpirvVarInfo inputVar;
 
     for (auto ins : code) {
       if (ins.opCode() == spv::OpDecorate) {
@@ -242,26 +246,26 @@ namespace dxvk {
 
       if (ins.opCode() == spv::OpVariable && spv::StorageClass(ins.arg(3)) == spv::StorageClassInput) {
         if (candidates.find(ins.arg(2)) != candidates.end()) {
-          inputVarOffset = ins.offset();
-          inputVarTypeId = ins.arg(1);
-          inputVarId     = ins.arg(2);
+          inputVar.offset = ins.offset();
+          inputVar.typeId = ins.arg(1);
+          inputVar.id     = ins.arg(2);
           break;
         }
       }
     }
 
-    if (!inputVarId)
-      return;
+    return inputVar;
+  }
 
-    // Declare private pointer types
-    auto pointerType = types.find(inputVarTypeId);
-    if (pointerType == types.end())
-      return;
+  using SpirvTypeInfos = std::vector<std::pair<uint32_t, SpirvTypeInfo>>;
 
-    code.beginInsertion(inputVarOffset);
-    std::vector<std::pair<uint32_t, SpirvTypeInfo>> privateTypes;
+  SpirvTypeInfos declarePrivatePointerTypes(SpirvCodeBuffer& code,
+                                            const std::unordered_map<uint32_t, SpirvTypeInfo>& types,
+                                            uint32_t typeId,
+                                            SpirvCodeBuffer& tmpCode) {
+    SpirvTypeInfos privateTypes;
 
-    for (auto p  = types.find(pointerType->second.baseTypeId);
+    for (auto p  = types.find(typeId);
               p != types.end();
               p  = types.find(p->second.baseTypeId)) {
       std::pair<uint32_t, SpirvTypeInfo> info = *p;
@@ -279,16 +283,21 @@ namespace dxvk {
       if (!info.first) {
         info.first = code.allocId();
 
-        code.putIns(spv::OpTypePointer, 4);
-        code.putWord(info.first);
-        code.putWord(info.second.storageClass);
-        code.putWord(info.second.baseTypeId);
+        tmpCode.putIns(spv::OpTypePointer, 4);
+        tmpCode.putWord(info.first);
+        tmpCode.putWord(info.second.storageClass);
+        tmpCode.putWord(info.second.baseTypeId);
       }
 
       privateTypes.push_back(info);
     }
 
-    // Define zero constants
+    return privateTypes;
+  }
+
+  uint32_t defineZeroConstants(SpirvCodeBuffer& code,
+                               const SpirvTypeInfos& privateTypes,
+                               SpirvCodeBuffer& tmpCode) {
     uint32_t constantId = 0;
 
     for (auto i = privateTypes.rbegin(); i != privateTypes.rend(); i++) {
@@ -296,68 +305,30 @@ namespace dxvk {
         uint32_t compositeSize = i->second.compositeSize;
         uint32_t compositeId   = code.allocId();
 
-        code.putIns(spv::OpConstantComposite, 3 + compositeSize);
-        code.putWord(i->second.baseTypeId);
-        code.putWord(compositeId);
+        tmpCode.putIns(spv::OpConstantComposite, 3 + compositeSize);
+        tmpCode.putWord(i->second.baseTypeId);
+        tmpCode.putWord(compositeId);
 
         for (uint32_t i = 0; i < compositeSize; i++)
-          code.putWord(constantId);
+          tmpCode.putWord(constantId);
 
         constantId = compositeId;
       } else {
         constantId = code.allocId();
 
-        code.putIns(spv::OpConstant, 4);
-        code.putWord(i->second.baseTypeId);
-        code.putWord(constantId);
-        code.putWord(0);
+        tmpCode.putIns(spv::OpConstant, 4);
+        tmpCode.putWord(i->second.baseTypeId);
+        tmpCode.putWord(constantId);
+        tmpCode.putWord(0);
       }
     }
 
-    // Erase and re-declare variable
-    code.erase(4);
+    return constantId;
+  }
 
-    code.putIns(spv::OpVariable, 5);
-    code.putWord(privateTypes[0].first);
-    code.putWord(inputVarId);
-    code.putWord(spv::StorageClassPrivate);
-    code.putWord(constantId);
-
-    code.endInsertion();
-
-    // Remove variable from interface list
-    for (auto ins : code) {
-      if (ins.opCode() == spv::OpEntryPoint) {
-        uint32_t argIdx = 2 + code.strLen(ins.chr(2));
-
-        while (argIdx < ins.length()) {
-          if (ins.arg(argIdx) == inputVarId) {
-            ins.setArg(0, spv::OpEntryPoint | ((ins.length() - 1) << spv::WordCountShift));
-
-            code.beginInsertion(ins.offset() + argIdx);
-            code.erase(1);
-            code.endInsertion();
-            break;
-          }
-
-          argIdx += 1;
-        }
-      }
-    }
-
-    // Remove location declarations
-    for (auto ins : code) {
-      if (ins.opCode() == spv::OpDecorate
-       && ins.arg(2) == spv::DecorationLocation
-       && ins.arg(1) == inputVarId) {
-        code.beginInsertion(ins.offset());
-        code.erase(4);
-        code.endInsertion();
-        break;
-      }
-    }
-
-    // Fix up pointer types used in access chain instructions
+  void fixupPointerTypes(SpirvCodeBuffer& code,
+                         const SpirvTypeInfos& privateTypes,
+                         const SpirvVarInfo& inputVar) {
     std::unordered_map<uint32_t, uint32_t> accessChainIds;
 
     for (auto ins : code) {
@@ -365,7 +336,7 @@ namespace dxvk {
        || ins.opCode() == spv::OpInBoundsAccessChain) {
         uint32_t depth = ins.length() - 4;
 
-        if (ins.arg(3) == inputVarId) {
+        if (ins.arg(3) == inputVar.id) {
           // Access chains accessing the variable directly
           ins.setArg(1, privateTypes.at(depth).first);
           accessChainIds.insert({ ins.arg(2), depth });
@@ -380,6 +351,67 @@ namespace dxvk {
         }
       }
     }
+  }
+
+  void DxvkShader::eliminateInput(SpirvCodeBuffer& code, uint32_t location) {
+    std::unordered_map<uint32_t, SpirvTypeInfo> types;
+
+    // Find the input variable in question
+    SpirvVarInfo inputVar = findInputVar(code, location, types);
+
+    if (!inputVar.id)
+      return;
+
+    // Declare private pointer types
+    auto pointerType = types.find(inputVar.typeId);
+    if (pointerType == types.end())
+      return;
+
+    SpirvCodeBuffer tmpCode;
+    uint32_t typeId = pointerType->second.baseTypeId;
+    SpirvTypeInfos privateTypes = declarePrivatePointerTypes(code, types, typeId, tmpCode);
+
+    // Define zero constants
+    uint32_t constantId = defineZeroConstants(code, privateTypes, tmpCode);
+
+    // Erase and re-declare variable
+    code.erase(inputVar.offset, inputVar.offset + 4);
+
+    tmpCode.putIns(spv::OpVariable, 5);
+    tmpCode.putWord(privateTypes[0].first);
+    tmpCode.putWord(inputVar.id);
+    tmpCode.putWord(spv::StorageClassPrivate);
+    tmpCode.putWord(constantId);
+
+    code.insert(inputVar.offset, tmpCode);
+
+    // Remove variable from interface list
+    for (auto ins : code) {
+      if (ins.opCode() == spv::OpEntryPoint) {
+
+        for (uint32_t argIdx = 2 + code.strLen(ins.chr(2)); argIdx < ins.length(); argIdx++) {
+          if (ins.arg(argIdx) == inputVar.id) {
+            ins.setLength(ins.length() - 1);
+
+            code.erase(ins.offset() + argIdx, ins.offset() + argIdx + 1);
+            break;
+          }
+        }
+      }
+    }
+
+    // Remove location declarations
+    for (auto ins : code) {
+      if (ins.opCode() == spv::OpDecorate
+       && ins.arg(2) == spv::DecorationLocation
+       && ins.arg(1) == inputVar.id) {
+        code.erase(ins.offset(), ins.offset() + 4);
+        break;
+      }
+    }
+
+    // Fix up pointer types used in access chain instructions
+    fixupPointerTypes(code, privateTypes, inputVar);
   }
   
 }

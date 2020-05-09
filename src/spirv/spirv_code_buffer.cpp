@@ -2,6 +2,7 @@
 #include <cstring>
 
 #include "spirv_code_buffer.h"
+#include "spirv_instruction.h"
 
 namespace dxvk {
   
@@ -9,14 +10,12 @@ namespace dxvk {
   SpirvCodeBuffer::~SpirvCodeBuffer() { }
   
   
-  SpirvCodeBuffer::SpirvCodeBuffer(uint32_t size)
-  : m_ptr(size) {
+  SpirvCodeBuffer::SpirvCodeBuffer(uint32_t size) {
     m_code.resize(size);
   }
 
 
-  SpirvCodeBuffer::SpirvCodeBuffer(uint32_t size, const uint32_t* data)
-  : m_ptr(size) {
+  SpirvCodeBuffer::SpirvCodeBuffer(uint32_t size, const uint32_t* data) {
     m_code.resize(size);
     std::memcpy(m_code.data(), data, size * sizeof(uint32_t));
   }
@@ -35,11 +34,19 @@ namespace dxvk {
     m_code.resize(buffer.size() / sizeof(uint32_t));
     std::memcpy(reinterpret_cast<char*>(m_code.data()),
       buffer.data(), m_code.size() * sizeof(uint32_t));
-    
-    m_ptr = m_code.size();
   }
   
-  
+  SpirvInstructionIterator SpirvCodeBuffer::begin() {
+    return SpirvInstructionIterator(
+      m_code.data(), 0, m_code.size());
+  }
+
+
+  SpirvInstructionIterator SpirvCodeBuffer::end() {
+    return SpirvInstructionIterator(nullptr, 0, 0);
+  }
+
+
   uint32_t SpirvCodeBuffer::allocId() {
     constexpr size_t BoundIdsOffset = 3;
 
@@ -51,22 +58,16 @@ namespace dxvk {
 
 
   void SpirvCodeBuffer::append(const SpirvCodeBuffer& other) {
-    if (other.size() != 0) {
-      const size_t size = m_code.size();
-      m_code.resize(size + other.m_code.size());
-      
-            uint32_t* dst = this->m_code.data();
-      const uint32_t* src = other.m_code.data();
-      
-      std::memcpy(dst + size, src, other.size());
-      m_ptr += other.m_code.size();
-    }
+    m_code.insert(m_code.end(), other.m_code.begin(), other.m_code.end());
+  }
+
+  void SpirvCodeBuffer::insert(size_t offset, const SpirvCodeBuffer& other) {
+    m_code.insert(m_code.begin() + offset, other.m_code.begin(),
+      other.m_code.end());
   }
   
-  
   void SpirvCodeBuffer::putWord(uint32_t word) {
-    m_code.insert(m_code.begin() + m_ptr, word);
-    m_ptr += 1;
+    m_code.push_back(word);
   }
   
   
@@ -132,10 +133,8 @@ namespace dxvk {
   }
   
   
-  void SpirvCodeBuffer::erase(size_t size) {
-    m_code.erase(
-      m_code.begin() + m_ptr,
-      m_code.begin() + m_ptr + size);
+  void SpirvCodeBuffer::erase(size_t beg, size_t end) {
+    m_code.erase(m_code.begin() + beg, m_code.begin() + end);
   }
 
 

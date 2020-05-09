@@ -38,6 +38,10 @@ namespace dxvk {
     uint32_t length() const {
       return this->arg(0) >> spv::WordCountShift;
     }
+
+    void setLength(uint32_t length) {
+      this->setArg(0, this->opCode() | (length << spv::WordCountShift));
+    }
     
     /**
      * \brief Instruction offset

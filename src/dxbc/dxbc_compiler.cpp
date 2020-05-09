@@ -3824,20 +3824,20 @@ namespace dxvk {
     m_controlFlowBlocks.pop_back();
     
     // Write out the 'if' header
-    m_module.beginInsertion(block.b_if.headerPtr);
+    SpirvModule tmpModule(spvVersion(1, 3));
     
-    m_module.opSelectionMerge(
+    tmpModule.opSelectionMerge(
       block.b_if.labelEnd,
       spv::SelectionControlMaskNone);
     
-    m_module.opBranchConditional(
+    tmpModule.opBranchConditional(
       block.b_if.ztestId,
       block.b_if.labelIf,
       block.b_if.labelElse != 0
         ? block.b_if.labelElse
         : block.b_if.labelEnd);
     
-    m_module.endInsertion();
+    m_module.insert(block.b_if.headerPtr, tmpModule);
     
     // End the active 'if' or 'else' block
     m_module.opBranch(block.b_if.labelEnd);
@@ -3922,8 +3922,8 @@ namespace dxvk {
     
     // Insert the 'switch' statement. For that, we need to
     // gather all the literal-label pairs for the construct.
-    m_module.beginInsertion(block.b_switch.insertPtr);
-    m_module.opSelectionMerge(
+    SpirvModule tmpModule(spvVersion(1, 3));
+    tmpModule.opSelectionMerge(
       block.b_switch.labelBreak,
       spv::SelectionControlMaskNone);
     
@@ -3932,12 +3932,12 @@ namespace dxvk {
     for (auto i = block.b_switch.labelCases; i != nullptr; i = i->next)
       jumpTargets.insert(jumpTargets.begin(), i->desc);
     
-    m_module.opSwitch(
+    tmpModule.opSwitch(
       block.b_switch.selectorId,
       block.b_switch.labelDefault,
       jumpTargets.size(),
       jumpTargets.data());
-    m_module.endInsertion();
+    m_module.insert(block.b_switch.insertPtr, tmpModule);
     
     // Destroy the list of case labels
     // FIXME we're leaking memory if compilation fails.

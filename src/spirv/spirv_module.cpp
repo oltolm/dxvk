@@ -2,6 +2,8 @@
 
 #include "spirv_module.h"
 
+#include "../spirv/spirv_instruction.h"
+
 namespace dxvk {
   
   SpirvModule::SpirvModule(uint32_t version)

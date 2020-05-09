@@ -1,5 +1,7 @@
 #include "spirv_compression.h"
 
+#include "../util/util_bit.h"
+
 namespace dxvk {
 
   SpirvCompressedBuffer::SpirvCompressedBuffer()

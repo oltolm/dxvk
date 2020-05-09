@@ -2484,20 +2484,20 @@ void DxsoCompiler::emitControlFlowGenericLoop(
     m_controlFlowBlocks.pop_back();
     
     // Write out the 'if' header
-    m_module.beginInsertion(block.b_if.headerPtr);
+    SpirvModule tmpModule(spvVersion(1, 3));
     
-    m_module.opSelectionMerge(
+    tmpModule.opSelectionMerge(
       block.b_if.labelEnd,
       spv::SelectionControlMaskNone);
     
-    m_module.opBranchConditional(
+    tmpModule.opBranchConditional(
       block.b_if.ztestId,
       block.b_if.labelIf,
       block.b_if.labelElse != 0
         ? block.b_if.labelElse
         : block.b_if.labelEnd);
     
-    m_module.endInsertion();
+    m_module.insert(block.b_if.headerPtr, tmpModule);
     
     // End the active 'if' or 'else' block
     m_module.opBranch(block.b_if.labelEnd);

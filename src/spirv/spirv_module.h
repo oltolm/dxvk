@@ -51,16 +51,12 @@ namespace dxvk {
     
     SpirvCodeBuffer compile() const;
     
-    size_t getInsertionPtr() {
-      return m_code.getInsertionPtr();
+    size_t getInsertionPtr() const {
+        return m_code.getInsertionPtr();
     }
-    
-    void beginInsertion(size_t ptr) {
-      m_code.beginInsertion(ptr);
-    }
-    
-    void endInsertion() {
-      m_code.endInsertion();
+
+    void insert(size_t offset, const SpirvModule& other) {
+        m_code.insert(offset, other.m_code);
     }
     
     uint32_t allocateId();

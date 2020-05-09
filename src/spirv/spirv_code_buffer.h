@@ -5,9 +5,9 @@
 #include <iostream>
 #include <vector>
 
-#include "spirv_instruction.h"
-
 namespace dxvk {
+
+  class SpirvInstructionIterator;
   
   /**
    * \brief SPIR-V code buffer
@@ -61,10 +61,7 @@ namespace dxvk {
      * block. The header, if any, will be skipped over.
      * \returns Instruction iterator
      */
-    SpirvInstructionIterator begin() {
-      return SpirvInstructionIterator(
-        m_code.data(), 0, m_code.size());
-    }
+    SpirvInstructionIterator begin();
     
     /**
      * \brief End instruction iterator
@@ -72,9 +69,7 @@ namespace dxvk {
      * Points to the end of the instruction block.
      * \returns Instruction iterator
      */
-    SpirvInstructionIterator end() {
-      return SpirvInstructionIterator(nullptr, 0, 0);
-    }
+    SpirvInstructionIterator end();
     
     /**
      * \brief Allocates a new ID
@@ -156,17 +151,17 @@ namespace dxvk {
      *
      * Removes data from the code buffer, starting
      * at the current insertion offset.
-     * \param [in] size Number of words to remove
+     * \param [in] size Number of dwords to remove
      */
-    void erase(size_t size);
+    void erase(size_t beg, size_t end);
     
     /**
      * \brief Computes length of a literal string
      * 
      * \param [in] str The string to check
-     * \returns Number of words consumed by a string
+     * \returns Number of dwords consumed by a string
      */
-    uint32_t strLen(const char* str);
+    static uint32_t strLen(const char* str);
     
     /**
      * \brief Stores the SPIR-V module to a stream
@@ -188,35 +183,14 @@ namespace dxvk {
      * \returns Current instruction pointr
      */
     size_t getInsertionPtr() const {
-      return m_ptr;
+      return m_code.size();
     }
-    
-    /**
-     * \brief Sets insertion pointer to a specific value
-     * 
-     * Sets the insertion pointer to a value that was
-     * previously retrieved by \ref getInsertionPtr.
-     * \returns Current instruction pointr
-     */
-    void beginInsertion(size_t ptr) {
-      m_ptr = ptr;
-    }
-    
-    /**
-     * \brief Sets insertion pointer to the end
-     * 
-     * After this call, new instructions will be
-     * appended to the stream. In other words,
-     * this will restore default behaviour.
-     */
-    void endInsertion() {
-      m_ptr = m_code.size();
-    }
+
+    void insert(size_t offset, const SpirvCodeBuffer& other);
     
   private:
     
     std::vector<uint32_t> m_code;
-    size_t m_ptr = 0;
     
   };
   
