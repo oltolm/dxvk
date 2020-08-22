@@ -260,7 +260,7 @@ namespace dxvk {
       return;
     
     // Add the shader so we can look it up by its key
-    std::unique_lock<dxvk::mutex> entryLock(m_entryLock);
+    std::lock_guard<dxvk::mutex> entryLock(m_entryLock);
     m_shaderMap.insert({ key, shader });
 
     auto pipelines = m_pipelineMap.equal_range(key);

@@ -102,7 +102,7 @@ namespace dxvk {
   
   
   DxvkCsThread::~DxvkCsThread() {
-    { std::unique_lock<dxvk::mutex> lock(m_mutex);
+    { std::lock_guard<dxvk::mutex> lock(m_mutex);
       m_stopped.store(true);
     }
     
@@ -112,7 +112,7 @@ namespace dxvk {
   
   
   void DxvkCsThread::dispatchChunk(DxvkCsChunkRef&& chunk) {
-    { std::unique_lock<dxvk::mutex> lock(m_mutex);
+    { std::lock_guard<dxvk::mutex> lock(m_mutex);
       m_chunksQueued.push(std::move(chunk));
       m_chunksPending += 1;
     }

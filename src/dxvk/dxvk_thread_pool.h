@@ -24,7 +24,7 @@ private:
   uint32_t numWorkers;
   std::atomic<bool> m_stopThreads = { false };
 
-  std::mutex m_workerLock;
+  dxvk::mutex m_workerLock;
   std::condition_variable m_workerCond;
   std::queue<std::function<void()>> m_workerQueue;
   std::atomic<uint32_t> m_workerBusy;
@@ -33,7 +33,7 @@ private:
 
 template<class T, class... Args>
 void DxvkThreadPool::enqueue(T&& task, Args&&... args) {
-  std::lock_guard<std::mutex> lock(m_workerLock);
+  std::lock_guard<dxvk::mutex> lock(m_workerLock);
 
   if (m_stopThreads.load())
     throw std::runtime_error("DxvkThreadPool::enqeue: stopped");

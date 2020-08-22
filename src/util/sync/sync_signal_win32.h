@@ -41,7 +41,7 @@ namespace dxvk::sync {
      * \param [in] value Value to set signal to
      */
     void signal(uint64_t value) {
-      std::unique_lock<dxvk::mutex> lock(m_mutex);
+      std::lock_guard<dxvk::mutex> lock(m_mutex);
       m_value.store(value, std::memory_order_release);
       m_cond.notify_all();
 
@@ -77,7 +77,7 @@ namespace dxvk::sync {
      * \param [in] value Requested signal value
      */
     void setEvent(HANDLE event, uint64_t value) {
-      std::unique_lock<dxvk::mutex> lock(m_mutex);
+      std::lock_guard<dxvk::mutex> lock(m_mutex);
 
       if (value > this->value())
         m_events.push_back({ event, value });

@@ -70,7 +70,7 @@ namespace dxvk::sync {
     }
 
     void signal(uint64_t value) {
-      std::unique_lock<dxvk::mutex> lock(m_mutex);
+      std::lock_guard<dxvk::mutex> lock(m_mutex);
       m_value.store(value, std::memory_order_release);
       m_cond.notify_all();
     }

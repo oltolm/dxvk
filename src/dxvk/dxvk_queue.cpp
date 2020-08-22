@@ -12,7 +12,7 @@ namespace dxvk {
   
   
   DxvkSubmissionQueue::~DxvkSubmissionQueue() {
-    { std::unique_lock<dxvk::mutex> lock(m_mutex);
+    { std::lock_guard<dxvk::mutex> lock(m_mutex);
       m_stopped.store(true);
     }
     
@@ -41,7 +41,7 @@ namespace dxvk {
 
 
   void DxvkSubmissionQueue::present(DxvkPresentInfo presentInfo, DxvkSubmitStatus* status) {
-    std::unique_lock<dxvk::mutex> lock(m_mutex);
+    std::lock_guard<dxvk::mutex> lock(m_mutex);
 
     DxvkSubmitEntry entry = { };
     entry.status  = status;

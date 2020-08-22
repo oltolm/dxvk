@@ -233,11 +233,11 @@ namespace dxvk {
      * \returns The new buffer slice
      */
     DxvkBufferSliceHandle allocSlice() {
-      std::unique_lock<sync::Spinlock> freeLock(m_freeMutex);
+      std::lock_guard<sync::Spinlock> freeLock(m_freeMutex);
       
       // If no slices are available, swap the two free lists.
       if (unlikely(m_freeSlices.empty())) {
-        std::unique_lock<sync::Spinlock> swapLock(m_swapMutex);
+        std::lock_guard<sync::Spinlock> swapLock(m_swapMutex);
         std::swap(m_freeSlices, m_nextSlices);
       }
 
@@ -276,7 +276,7 @@ namespace dxvk {
      */
     void freeSlice(const DxvkBufferSliceHandle& slice) {
       // Add slice to a separate free list to reduce lock contention.
-      std::unique_lock<sync::Spinlock> swapLock(m_swapMutex);
+      std::lock_guard<sync::Spinlock> swapLock(m_swapMutex);
       m_nextSlices.push_back(slice);
     }
     

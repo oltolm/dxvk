@@ -27,7 +27,7 @@ DxvkThreadPool::DxvkThreadPool(dxvk::ThreadPriority priority,
         std::function<void()> task;
 
         {
-          std::unique_lock<std::mutex> lock(m_workerLock);
+          std::unique_lock<dxvk::mutex> lock(m_workerLock);
 
           if (m_workerQueue.empty()) {
             m_workerBusy -= 1;
@@ -56,7 +56,7 @@ DxvkThreadPool::DxvkThreadPool(dxvk::ThreadPriority priority,
 
 DxvkThreadPool::~DxvkThreadPool() {
   {
-    std::lock_guard<std::mutex> workerLock(m_workerLock);
+    std::lock_guard<dxvk::mutex> workerLock(m_workerLock);
     m_stopThreads.store(true);
     m_workerCond.notify_all();
   }
