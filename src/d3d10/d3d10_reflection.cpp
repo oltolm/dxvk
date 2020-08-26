@@ -146,15 +146,7 @@ namespace dxvk {
     if (!pVariable)
       return nullptr;
 
-    auto entry = m_variables.find(pVariable);
-
-    if (entry == m_variables.end()) {
-      entry = m_variables.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(pVariable),
-        std::forward_as_tuple(pVariable)).first;
-    }
-
+    auto [entry, _] = m_variables.try_emplace(pVariable, pVariable);
     return &entry->second;
   }
 
@@ -298,15 +290,7 @@ namespace dxvk {
     if (!pConstantBuffer)
       return nullptr;
 
-    auto entry = m_constantBuffers.find(pConstantBuffer);
-
-    if (entry == m_constantBuffers.end()) {
-      entry = m_constantBuffers.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(pConstantBuffer),
-        std::forward_as_tuple(pConstantBuffer)).first;
-    }
-
+    auto [entry, _] = m_constantBuffers.try_emplace(pConstantBuffer, pConstantBuffer);
     return &entry->second;
   }
 

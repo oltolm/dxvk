@@ -12,6 +12,8 @@ namespace dxvk {
 
   class D3D10ShaderReflectionType : public ID3D10ShaderReflectionType {
 
+  using D3D10ShaderReflectionTypePtr = std::unique_ptr<D3D10ShaderReflectionType>;
+
   public:
 
     D3D10ShaderReflectionType(
@@ -41,7 +43,7 @@ namespace dxvk {
 
     std::unordered_map<
       ID3D11ShaderReflectionType*,
-      std::unique_ptr<D3D10ShaderReflectionType>> m_members;
+      D3D10ShaderReflectionTypePtr> m_members;
 
     ID3D10ShaderReflectionType* FindMemberType(
             ID3D11ShaderReflectionType*     pMemberType);

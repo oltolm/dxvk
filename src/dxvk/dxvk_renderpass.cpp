@@ -247,13 +247,7 @@ namespace dxvk {
   DxvkRenderPass* DxvkRenderPassPool::getRenderPass(const DxvkRenderPassFormat& fmt) {
     std::lock_guard<dxvk::mutex> lock(m_mutex);
 
-    auto entry = m_renderPasses.find(fmt);
-    if (entry != m_renderPasses.end())
-      return &entry->second;
-    
-    auto result = m_renderPasses.emplace(std::piecewise_construct,
-      std::tuple(fmt),
-      std::tuple(m_vkd, fmt));
+    auto result = m_renderPasses.try_emplace(fmt, m_vkd, fmt);
     return &result.first->second;
   }
   

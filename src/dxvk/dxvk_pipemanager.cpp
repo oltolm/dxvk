@@ -28,14 +28,7 @@ namespace dxvk {
     
     std::lock_guard<dxvk::mutex> lock(m_mutex);
     
-    auto pair = m_computePipelines.find(shaders);
-    if (pair != m_computePipelines.end())
-      return &pair->second;
-    
-    auto iter = m_computePipelines.emplace(
-      std::piecewise_construct,
-      std::tuple(shaders),
-      std::tuple(this, shaders));
+    auto iter = m_computePipelines.try_emplace(shaders, this, shaders);
     return &iter.first->second;
   }
   
@@ -47,14 +40,7 @@ namespace dxvk {
     
     std::lock_guard<dxvk::mutex> lock(m_mutex);
     
-    auto pair = m_graphicsPipelines.find(shaders);
-    if (pair != m_graphicsPipelines.end())
-      return &pair->second;
-    
-    auto iter = m_graphicsPipelines.emplace(
-      std::piecewise_construct,
-      std::tuple(shaders),
-      std::tuple(this, shaders));
+    auto iter = m_graphicsPipelines.try_emplace(shaders, this, shaders);
     return &iter.first->second;
   }
 

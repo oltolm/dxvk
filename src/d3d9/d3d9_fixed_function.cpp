@@ -2374,16 +2374,9 @@ namespace dxvk {
           D3D9DeviceEx*         pDevice,
     const D3D9FFShaderKeyVS&    ShaderKey) {
     // Use the shader's unique key for the lookup
-    auto entry = m_vsModules.find(ShaderKey);
-    if (entry != m_vsModules.end())
-      return entry->second;
-    
-    D3D9FFShader shader(
+    auto [entry, _] = m_vsModules.try_emplace(ShaderKey,
       pDevice, ShaderKey);
-
-    m_vsModules.insert({ShaderKey, shader});
-
-    return shader;
+    return entry->second;
   }
 
 
@@ -2391,16 +2384,9 @@ namespace dxvk {
           D3D9DeviceEx*         pDevice,
     const D3D9FFShaderKeyFS&    ShaderKey) {
     // Use the shader's unique key for the lookup
-    auto entry = m_fsModules.find(ShaderKey);
-    if (entry != m_fsModules.end())
-      return entry->second;
-    
-    D3D9FFShader shader(
+    auto [entry, _] = m_fsModules.try_emplace(ShaderKey,
       pDevice, ShaderKey);
-
-    m_fsModules.insert({ShaderKey, shader});
-
-    return shader;
+    return entry->second;
   }
 
 

@@ -56,15 +56,7 @@ namespace dxvk {
     T* Create(D3D11Device* device, const DescType& desc) {
       std::lock_guard<dxvk::mutex> lock(m_mutex);
       
-      auto entry = m_objects.find(desc);
-      
-      if (entry != m_objects.end())
-        return ref(&entry->second);
-      
-      auto result = m_objects.emplace(
-        std::piecewise_construct,
-        std::tuple(desc),
-        std::tuple(device, desc));
+      auto result = m_objects.try_emplace(desc, device, desc);
       return ref(&result.first->second);
     }
     

@@ -341,12 +341,9 @@ namespace dxvk {
     // that object instead and discard the newly created module.
     { std::lock_guard<dxvk::mutex> lock(m_mutex);
       
-      auto status = m_modules.insert({ elements, shader });
-      if (!status.second)
-        return status.first->second;
+      auto status = m_modules.emplace(elements, shader);
+      return status.first->second;
     }
-
-    return shader;
   }
 
 }
