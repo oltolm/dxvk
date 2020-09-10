@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include "../thread.h"
 
@@ -28,7 +29,7 @@ namespace dxvk {
     
   public:
     
-    Logger(const std::string& file_name);
+    Logger(const std::wstring& file_name);
     ~Logger();
     
     static void trace(const std::string& message);
@@ -55,8 +56,8 @@ namespace dxvk {
     
     static LogLevel getMinLogLevel();
     
-    static std::string getFileName(
-      const std::string& base);
+    static std::filesystem::path getFileName(
+      const std::wstring& base);
 
   };
   

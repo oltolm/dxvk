@@ -2,6 +2,7 @@
 
 #include "d3d9_device.h"
 #include "d3d9_util.h"
+#include <filesystem>
 
 namespace dxvk {
 
@@ -24,9 +25,9 @@ namespace dxvk {
     
     // If requested by the user, dump both the raw DXBC
     // shader and the compiled SPIR-V module to a file.
-    const std::string dumpPath = env::getEnvVar("DXVK_SHADER_DUMP_PATH");
+    const std::filesystem::path dumpPath = env::getEnvVar(L"DXVK_SHADER_DUMP_PATH");
     
-    if (dumpPath.size() != 0) {
+    if (!dumpPath.empty()) {
       DxsoReader reader(
         reinterpret_cast<const char*>(pShaderBytecode));
 
@@ -42,7 +43,8 @@ namespace dxvk {
         &blob);
       
       if (SUCCEEDED(hr)) {
-        std::ofstream disassembledOut(str::tows(str::format(dumpPath, "/", name, ".dxso.dis").c_str()).c_str(), std::ios_base::binary | std::ios_base::trunc);
+        std::ofstream disassembledOut(dumpPath / (name + ".dxso.dis"),
+          std::ios_base::binary | std::ios_base::trunc);
         disassembledOut.write(
           reinterpret_cast<const char*>(blob->GetBufferPointer()),
           blob->GetBufferSize());
@@ -78,9 +80,9 @@ namespace dxvk {
       m_shaders[1]->setShaderKey({ VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, Key.sha1() });
     }
     
-    if (dumpPath.size() != 0) {
+    if (!dumpPath.empty()) {
       std::ofstream dumpStream(
-        str::tows(str::format(dumpPath, "/", name, ".spv").c_str()).c_str(),
+        dumpPath / (name + ".spv"),
         std::ios_base::binary | std::ios_base::trunc);
       
       m_shaders[0]->dump(dumpStream);

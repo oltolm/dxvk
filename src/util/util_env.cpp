@@ -6,16 +6,19 @@
 
 namespace dxvk::env {
 
-  std::string getEnvVar(const char* name) {
-    std::vector<WCHAR> result;
-    result.resize(MAX_PATH + 1);
+  std::wstring getEnvVar(const wchar_t* name) {
+    std::wstring result;
+    result.resize(MAX_PATH);
 
-    DWORD len = ::GetEnvironmentVariableW(str::tows(name).c_str(), result.data(), MAX_PATH);
+    DWORD len = ::GetEnvironmentVariableW(name, result.data(), MAX_PATH);
     result.resize(len);
 
-    return str::fromws(result.data());
+    return result;
   }
 
+  std::string getEnvVar(const char* name) {
+    return str::fromws(getEnvVar(str::tows(name).c_str()).c_str());
+  }
 
   size_t matchFileExtension(const std::string& name, const char* ext) {
     auto pos = name.find_last_of('.');
@@ -34,13 +37,9 @@ namespace dxvk::env {
   }
 
 
-  std::string getExeName() {
-    std::string fullPath = getExePath();
-    auto n = fullPath.find_last_of('\\');
-    
-    return (n != std::string::npos)
-      ? fullPath.substr(n + 1)
-      : fullPath;
+  
+  std::filesystem::path getExeName() {
+    return getExePath().filename();
   }
 
 
@@ -55,14 +54,14 @@ namespace dxvk::env {
   }
 
 
-  std::string getExePath() {
-    std::vector<WCHAR> exePath;
-    exePath.resize(MAX_PATH + 1);
+  std::filesystem::path getExePath() {
+    std::wstring exePath;
+    exePath.resize(MAX_PATH);
 
     DWORD len = ::GetModuleFileNameW(NULL, exePath.data(), MAX_PATH);
     exePath.resize(len);
 
-    return str::fromws(exePath.data());
+    return exePath;
   }
   
   
@@ -80,10 +79,8 @@ namespace dxvk::env {
   }
 
 
-  bool createDirectory(const std::string& path) {
-    WCHAR widePath[MAX_PATH];
-    str::tows(path.c_str(), widePath);
-    return !!CreateDirectoryW(widePath, nullptr);
+  bool createDirectory(const std::filesystem::path& path) {
+    return std::filesystem::create_directory(path);
   }
   
 }

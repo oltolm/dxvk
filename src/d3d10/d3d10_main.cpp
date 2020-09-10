@@ -6,7 +6,7 @@
 #include "../dxgi/dxgi_adapter.h"
 
 namespace dxvk {
-  Logger Logger::s_instance("d3d10.log");
+  Logger Logger::s_instance(L"d3d10.log");
 }
 
 extern "C" {

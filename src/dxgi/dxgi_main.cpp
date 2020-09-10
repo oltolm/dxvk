@@ -3,7 +3,7 @@
 
 namespace dxvk {
   
-  Logger Logger::s_instance("dxgi.log");
+  Logger Logger::s_instance(L"dxgi.log");
   
   HRESULT createDxgiFactory(UINT Flags, REFIID riid, void **ppFactory) {
     try {

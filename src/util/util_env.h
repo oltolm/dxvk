@@ -1,9 +1,21 @@
 #pragma once
 
 #include "util_string.h"
+#include <filesystem>
 
 namespace dxvk::env {
   
+  /**
+   * \brief Gets environment variable
+   * 
+   * If the variable is not defined, this will return
+   * an empty string. Note that environment variables
+   * may be defined with an empty value.
+   * \param [in] name Name of the variable
+   * \returns Value of the variable
+   */
+  std::wstring getEnvVar(const wchar_t* name);
+
   /**
    * \brief Gets environment variable
    * 
@@ -33,7 +45,7 @@ namespace dxvk::env {
    * This function should be used to identify programs.
    * \returns Executable name
    */
-  std::string getExeName();
+  std::filesystem::path getExeName();
   
   /**
    * \brief Gets the executable name without extension
@@ -47,7 +59,7 @@ namespace dxvk::env {
    * \brief Gets full path to executable
    * \returns Path to executable
    */
-  std::string getExePath();
+  std::filesystem::path getExePath();
   
   /**
    * \brief Sets name of the calling thread
@@ -61,6 +73,6 @@ namespace dxvk::env {
    * \param [in] path Path to directory
    * \returns \c true on success
    */
-  bool createDirectory(const std::string& path);
+  bool createDirectory(const std::filesystem::path& path);
   
 }

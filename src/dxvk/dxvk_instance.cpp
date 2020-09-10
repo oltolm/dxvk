@@ -14,7 +14,7 @@ namespace dxvk {
     Logger::info(str::format("DXVK: ", DXVK_VERSION));
 
     m_config = Config::getUserConfig();
-    m_config.merge(Config::getAppConfig(env::getExePath()));
+    m_config.merge(Config::getAppConfig(env::getExePath().string()));
     m_config.logOptions();
 
     m_options = DxvkOptions(m_config);
@@ -122,7 +122,7 @@ namespace dxvk {
     Logger::info("Enabled instance extensions:");
     this->logNameList(extensionNameList);
 
-    std::string appName = env::getExeName();
+    std::string appName = env::getExeName().string();
     
     VkApplicationInfo appInfo;
     appInfo.sType                 = VK_STRUCTURE_TYPE_APPLICATION_INFO;

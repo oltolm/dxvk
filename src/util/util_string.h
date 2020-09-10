@@ -40,4 +40,6 @@ namespace dxvk::str {
     return stream.str();
   }
   
+  std::ostream& operator<<(std::ostream& os, const std::wstring& str);
+  
 }

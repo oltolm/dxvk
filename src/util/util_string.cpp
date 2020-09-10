@@ -40,4 +40,9 @@ namespace dxvk::str {
     return result;
   }
 
+  std::ostream& operator<<(std::ostream& os, const std::wstring& str) {
+      os << fromws(str.c_str());
+      return os;
+  }
+
 }

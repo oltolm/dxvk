@@ -162,12 +162,12 @@ namespace dxvk {
       Logger::warn("DXVK: Creating new state cache file");
 
       // Start with an empty file
-      std::ofstream file(getCacheFileName().c_str(),
+      std::ofstream file(getCacheFileName(),
         std::ios_base::binary |
         std::ios_base::trunc);
 
       if (!file && env::createDirectory(getCacheDir())) {
-        file = std::ofstream(getCacheFileName().c_str(),
+        file = std::ofstream(getCacheFileName(),
           std::ios_base::binary |
           std::ios_base::trunc);
       }
@@ -217,7 +217,7 @@ namespace dxvk {
       format, g_nullHash}]() {
       env::setThreadName("dxvk-writer");
 
-      std::ofstream file = std::ofstream(getCacheFileName().c_str(),
+      std::ofstream file = std::ofstream(getCacheFileName(),
         std::ios_base::binary |
         std::ios_base::app);
       writeCacheEntry(file, entry);
@@ -245,7 +245,7 @@ namespace dxvk {
       DxvkRenderPassFormat(), g_nullHash }]() {
       env::setThreadName("dxvk-writer");
   
-      std::ofstream file = std::ofstream(getCacheFileName().c_str(),
+      std::ofstream file = std::ofstream(getCacheFileName(),
         std::ios_base::binary |
         std::ios_base::app);
       writeCacheEntry(file, entry);
@@ -352,7 +352,7 @@ namespace dxvk {
 
   bool DxvkStateCache::readCacheFile() {
     // Open state file and just fail if it doesn't exist
-    std::ifstream ifile(getCacheFileName().c_str(), std::ios_base::binary);
+    std::ifstream ifile(getCacheFileName(), std::ios_base::binary);
 
     if (!ifile) {
       Logger::warn("DXVK: No state cache file found");
@@ -885,20 +885,13 @@ namespace dxvk {
   }
 
 
-  std::wstring DxvkStateCache::getCacheFileName() const {
-    std::string path = getCacheDir();
-
-    if (!path.empty() && *path.rbegin() != '/')
-      path += '/';
-    
-    std::string exeName = env::getExeBaseName();
-    path += exeName + ".dxvk-cache";
-    return str::tows(path.c_str());
+  std::filesystem::path DxvkStateCache::getCacheFileName() const {
+    return getCacheDir() / (env::getExeBaseName().replace_extension(L".dxvk-cache"));
   }
 
 
-  std::string DxvkStateCache::getCacheDir() const {
-    return env::getEnvVar("DXVK_STATE_CACHE_PATH");
+  std::filesystem::path DxvkStateCache::getCacheDir() const {
+    return env::getEnvVar(L"DXVK_STATE_CACHE_PATH");
   }
 
 

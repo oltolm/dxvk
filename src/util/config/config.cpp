@@ -491,7 +491,7 @@ namespace dxvk {
       while (n < e)
         key << line[n++];
       
-      ctx.active = key.str() == env::getExeName();
+      ctx.active = key.str() == env::getExeName().string();
     } else {
       while (n < line.size() && isValidKeyChar(line[n]))
         key << line[n++];
@@ -643,13 +643,13 @@ namespace dxvk {
     Config config;
 
     // Load either $DXVK_CONFIG_FILE or $PWD/dxvk.conf
-    std::string filePath = env::getEnvVar("DXVK_CONFIG_FILE");
+    std::filesystem::path filePath = env::getEnvVar(L"DXVK_CONFIG_FILE");
 
-    if (filePath == "")
-      filePath = "dxvk.conf";
+    if (filePath.empty())
+      filePath = L"dxvk.conf";
     
     // Open the file if it exists
-    std::ifstream stream(str::tows(filePath.c_str()).c_str());
+    std::ifstream stream(filePath);
 
     if (!stream)
       return config;

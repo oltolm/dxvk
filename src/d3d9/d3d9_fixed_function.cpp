@@ -2358,11 +2358,11 @@ namespace dxvk {
 
   template <typename T>
   void D3D9FFShader::Dump(const T& Key, const std::string& Name) {
-    const std::string dumpPath = env::getEnvVar("DXVK_SHADER_DUMP_PATH");
+    const std::filesystem::path dumpPath = env::getEnvVar(L"DXVK_SHADER_DUMP_PATH");
 
-    if (dumpPath.size() != 0) {
+    if (!dumpPath.empty()) {
       std::ofstream dumpStream(
-        str::tows(str::format(dumpPath, "/", Name, ".spv").c_str()).c_str(),
+        dumpPath / (Name + ".spv"),
         std::ios_base::binary | std::ios_base::trunc);
       
       m_shader->dump(dumpStream);

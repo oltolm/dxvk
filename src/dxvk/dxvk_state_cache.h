@@ -166,9 +166,9 @@ namespace dxvk {
       const DxvkStateCacheEntryV6&    in,
             DxvkStateCacheEntry&      out) const;
     
-    std::wstring getCacheFileName() const;
+    std::filesystem::path getCacheFileName() const;
     
-    std::string getCacheDir() const;
+    std::filesystem::path getCacheDir() const;
 
     static uint8_t packImageLayout(
             VkImageLayout             layout);

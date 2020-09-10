@@ -24,10 +24,10 @@ namespace dxvk {
     
     // If requested by the user, dump both the raw DXBC
     // shader and the compiled SPIR-V module to a file.
-    const std::string dumpPath = env::getEnvVar("DXVK_SHADER_DUMP_PATH");
+    const std::filesystem::path dumpPath = env::getEnvVar(L"DXVK_SHADER_DUMP_PATH");
     
-    if (dumpPath.size() != 0) {
-      reader.store(std::ofstream(str::tows(str::format(dumpPath, "/", name, ".dxbc").c_str()).c_str(),
+    if (!dumpPath.empty()) {
+      reader.store(std::ofstream(dumpPath / (name + ".dxbc"),
         std::ios_base::binary | std::ios_base::trunc));
     }
     
@@ -45,9 +45,9 @@ namespace dxvk {
       : module.compile                 (*pDxbcModuleInfo, name);
     m_shader->setShaderKey(*pShaderKey);
     
-    if (dumpPath.size() != 0) {
+    if (!dumpPath.empty()) {
       std::ofstream dumpStream(
-        str::tows(str::format(dumpPath, "/", name, ".spv").c_str()).c_str(),
+        dumpPath / (name + ".spv"),
         std::ios_base::binary | std::ios_base::trunc);
       
       m_shader->dump(dumpStream);

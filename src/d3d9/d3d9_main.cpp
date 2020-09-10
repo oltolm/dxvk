@@ -7,7 +7,7 @@ class D3DFE_PROCESSVERTICES;
 using PSGPERRORID = UINT;
 
 namespace dxvk {
-  Logger Logger::s_instance("d3d9.log");
+  Logger Logger::s_instance(L"d3d9.log");
 
   HRESULT CreateD3D9(
           bool           Extended,

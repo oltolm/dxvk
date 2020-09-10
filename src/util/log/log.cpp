@@ -4,13 +4,13 @@
 
 namespace dxvk {
   
-  Logger::Logger(const std::string& file_name)
+  Logger::Logger(const std::wstring& file_name)
   : m_minLevel(getMinLogLevel()) {
     if (m_minLevel != LogLevel::None) {
       auto path = getFileName(file_name);
 
       if (!path.empty())
-        m_fileStream = std::ofstream(str::tows(path.c_str()).c_str());
+        m_fileStream = std::ofstream(path);
     }
   }
   
@@ -91,18 +91,13 @@ namespace dxvk {
   }
   
   
-  std::string Logger::getFileName(const std::string& base) {
-    std::string path = env::getEnvVar("DXVK_LOG_PATH");
+  std::filesystem::path Logger::getFileName(const std::wstring& base) {
+    std::filesystem::path path = env::getEnvVar(L"DXVK_LOG_PATH");
     
-    if (path == "none")
-      return "";
+    if (path == L"none")
+      return L"";
 
-    if (!path.empty() && *path.rbegin() != '/')
-      path += '/';
-
-    std::string exeName = env::getExeBaseName();
-    path += exeName + "_" + base;
-    return path;
+    return path / (env::getExeBaseName().stem().wstring() + L"_" + base);
   }
   
 }

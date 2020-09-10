@@ -9,7 +9,7 @@
 #include "d3d11_interop.h"
 
 namespace dxvk {
-  Logger Logger::s_instance("d3d11.log");
+  Logger Logger::s_instance(L"d3d11.log");
 }
   
 extern "C" {
