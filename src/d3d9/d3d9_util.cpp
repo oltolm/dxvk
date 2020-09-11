@@ -16,13 +16,13 @@ namespace dxvk {
           char*      pComments, 
           ID3DBlob** ppDisassembly) {
     if (g_pfnDisassembleShader == nullptr) {
-      HMODULE d3d9x = LoadLibraryA("d3dx9.dll");
+      HMODULE d3d9x = ::LoadLibraryW(L"d3dx9.dll");
 
       if (d3d9x == nullptr)
-        d3d9x = LoadLibraryA("d3dx9_43.dll");
+        d3d9x = ::LoadLibraryW(L"d3dx9_43.dll");
 
       g_pfnDisassembleShader = 
-        reinterpret_cast<D3DXDisassembleShader>(GetProcAddress(d3d9x, "D3DXDisassembleShader"));
+        reinterpret_cast<D3DXDisassembleShader>(::GetProcAddress(d3d9x, "D3DXDisassembleShader"));
     }
 
     if (g_pfnDisassembleShader == nullptr)

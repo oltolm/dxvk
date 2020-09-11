@@ -28,7 +28,7 @@ namespace dxvk {
       && DxvkGpuVendor(devInfo.core.properties.vendorID) != DxvkGpuVendor::Amd;
 
     bool apitraceAttached = false;
-    apitraceAttached = ::GetModuleHandle("dxgitrace.dll") != nullptr;
+    apitraceAttached = ::GetModuleHandleW(L"dxgitrace.dll") != nullptr;
 
     this->apitraceMode = config.getOption<bool>("d3d11.apitraceMode", apitraceAttached);
 

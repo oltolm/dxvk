@@ -9,7 +9,7 @@
 #include <windowsx.h>
 
 namespace dxvk {
-  Logger Logger::s_instance("dxbc-compiler.log");
+  Logger Logger::s_instance(L"dxbc-compiler.log");
 }
 
 using namespace dxvk;

@@ -54,10 +54,10 @@ namespace dxvk {
     
     const auto& props = m_adapter->deviceProperties();
 
-    DISPLAY_DEVICEA device = { };
+    DISPLAY_DEVICEW device = { };
     device.cb = sizeof(device);
 
-    if (!::EnumDisplayDevicesA(nullptr, m_displayIndex, &device, 0)) {
+    if (!::EnumDisplayDevicesW(nullptr, m_displayIndex, &device, 0)) {
       Logger::err("D3D9Adapter::GetAdapterIdentifier: Failed to query display info");
       return D3DERR_INVALIDCALL;
     }
@@ -70,7 +70,7 @@ namespace dxvk {
     const char* driver = GetDriverDLL(DxvkGpuVendor(vendorId));
 
     std::strncpy(pIdentifier->Description, desc,              countof(pIdentifier->Description));
-    std::strncpy(pIdentifier->DeviceName,  device.DeviceName, countof(pIdentifier->DeviceName)); // The GDI device name. Not the actual device name.
+    std::strncpy(pIdentifier->DeviceName,  str::fromws(device.DeviceName).c_str(), countof(pIdentifier->DeviceName)); // The GDI device name. Not the actual device name.
     std::strncpy(pIdentifier->Driver,      driver,            countof(pIdentifier->Driver));     // This is the driver's dll.
 
     pIdentifier->DeviceIdentifier       = guid;

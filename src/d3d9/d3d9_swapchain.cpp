@@ -19,14 +19,6 @@ namespace dxvk {
   static std::unordered_map<HWND, D3D9WindowData> g_windowProcMap;
 
 
-  template <typename T, typename J, typename ... Args>
-  auto CallCharsetFunction(T unicode, J ascii, bool isUnicode, Args... args) {
-    return isUnicode
-      ? unicode(args...)
-      : ascii  (args...);
-  }
-
-
   class D3D9WindowMessageFilter {
 
   public:
@@ -66,15 +58,13 @@ namespace dxvk {
       return;
 
     auto proc = reinterpret_cast<WNDPROC>(
-      CallCharsetFunction(
-      GetWindowLongPtrW, GetWindowLongPtrA, it->second.unicode,
+      (it->second.unicode ? ::GetWindowLongPtrW : ::GetWindowLongPtrA)(
         window, GWLP_WNDPROC));
 
 
     if (proc == D3D9WindowProc)
-      CallCharsetFunction(
-        SetWindowLongPtrW, SetWindowLongPtrA, it->second.unicode,
-          window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(it->second.proc));
+      (it->second.unicode ? ::SetWindowLongPtrW : ::SetWindowLongPtrA)(
+        window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(it->second.proc));
 
     g_windowProcMap.erase(window);
   }
@@ -86,11 +76,10 @@ namespace dxvk {
     ResetWindowProc(window);
 
     D3D9WindowData windowData;
-    windowData.unicode = IsWindowUnicode(window);
+    windowData.unicode = ::IsWindowUnicode(window);
     windowData.filter  = false;
     windowData.proc = reinterpret_cast<WNDPROC>(
-      CallCharsetFunction(
-      SetWindowLongPtrW, SetWindowLongPtrA, windowData.unicode,
+      (windowData.unicode ? ::SetWindowLongPtrW : ::SetWindowLongPtrA)(
         window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(D3D9WindowProc)));
     windowData.swapchain = swapchain;
 
@@ -114,12 +103,11 @@ namespace dxvk {
 
     bool unicode = windowData.proc
       ? windowData.unicode
-      : IsWindowUnicode(window);
+      : ::IsWindowUnicode(window);
 
     if (!windowData.proc || windowData.filter)
-      return CallCharsetFunction(
-        DefWindowProcW, DefWindowProcA, unicode,
-          window, message, wparam, lparam);
+      return (unicode ? ::DefWindowProcW : ::DefWindowProcA)(
+        window, message, wparam, lparam);
 
     if (message == WM_DESTROY)
       ResetWindowProc(window);
@@ -145,9 +133,8 @@ namespace dxvk {
       }
     }
 
-    return CallCharsetFunction(
-      CallWindowProcW, CallWindowProcA, unicode,
-        windowData.proc, window, message, wparam, lparam);
+    return (unicode ? ::CallWindowProcW : ::CallWindowProcA)(
+      windowData.proc, window, message, wparam, lparam);
   }
 
 

@@ -21,12 +21,12 @@ namespace dxvk {
     // We can't match up by names on Linux/Wine as they don't match at all
     // like on Windows, so this is our best option.
     if (m_d3d9Options.enumerateByDisplays) {
-      DISPLAY_DEVICEA device = { };
+      DISPLAY_DEVICEW device = { };
       device.cb = sizeof(device);
 
       uint32_t adapterOrdinal = 0;
       uint32_t i = 0;
-      while (::EnumDisplayDevicesA(nullptr, i++, &device, 0)) {
+      while (::EnumDisplayDevicesW(nullptr, i++, &device, 0)) {
         // If we aren't attached, skip over.
         if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP))
           continue;

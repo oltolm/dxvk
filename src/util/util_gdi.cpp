@@ -4,13 +4,13 @@
 namespace dxvk {
 
   HMODULE GetGDIModule() {
-    static HMODULE module = LoadLibraryA("gdi32.dll");
+    static HMODULE module = ::LoadLibraryW(L"gdi32.dll");
     return module;
   }
 
   NTSTATUS D3DKMTCreateDCFromMemory(D3DKMT_CREATEDCFROMMEMORY* Arg1) {
     static auto func = (D3DKMTCreateDCFromMemoryType)
-      GetProcAddress(GetGDIModule(), "D3DKMTCreateDCFromMemory");
+      ::GetProcAddress(GetGDIModule(), "D3DKMTCreateDCFromMemory");
 
     if (func != nullptr)
       return func(Arg1);
@@ -21,7 +21,7 @@ namespace dxvk {
 
   NTSTATUS D3DKMTDestroyDCFromMemory(D3DKMT_DESTROYDCFROMMEMORY* Arg1) {
     static auto func = (D3DKMTDestroyDCFromMemoryType)
-      GetProcAddress(GetGDIModule(), "D3DKMTDestroyDCFromMemory");
+      ::GetProcAddress(GetGDIModule(), "D3DKMTDestroyDCFromMemory");
 
     if (func != nullptr)
       return func(Arg1);

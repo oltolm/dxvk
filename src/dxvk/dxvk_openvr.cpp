@@ -306,8 +306,8 @@ namespace dxvk {
 
   HMODULE VrInstance::loadLibrary() {
     HMODULE handle = nullptr;
-    if (!(handle = ::GetModuleHandle("openvr_api.dll"))) {
-      handle = ::LoadLibrary("openvr_api_dxvk.dll");
+    if (!(handle = ::GetModuleHandleW(L"openvr_api.dll"))) {
+      handle = ::LoadLibraryW(L"openvr_api_dxvk.dll");
       m_loadedOvrApi = handle != nullptr;
     }
     return handle;

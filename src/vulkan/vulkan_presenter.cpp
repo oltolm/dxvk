@@ -14,7 +14,7 @@ namespace dxvk::vk {
     // As of Wine 5.9, winevulkan provides this extension, but does
     // not filter the pNext chain for VkSwapchainCreateInfoKHR properly
     // before passing it to the Linux sude, which breaks RenderDoc.
-    if (m_device.features.fullScreenExclusive && ::GetModuleHandle("winevulkan.dll")) {
+    if (m_device.features.fullScreenExclusive && ::GetModuleHandleW(L"winevulkan.dll")) {
       Logger::warn("winevulkan detected, disabling exclusive fullscreen support");
       m_device.features.fullScreenExclusive = false;
     }
@@ -446,7 +446,7 @@ namespace dxvk::vk {
 
   VkResult Presenter::createSurface() {
     HINSTANCE instance = reinterpret_cast<HINSTANCE>(
-      GetWindowLongPtr(m_window, GWLP_HINSTANCE));
+      ::GetWindowLongPtrW(m_window, GWLP_HINSTANCE));
     
     VkWin32SurfaceCreateInfoKHR info;
     info.sType      = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

@@ -58,7 +58,7 @@ PS_OUTPUT main( VS_OUTPUT IN ) {
 
 )";
 
-Logger Logger::s_instance("triangle.log");
+Logger Logger::s_instance(L"triangle.log");
 
 class TriangleApp {
   
