@@ -2049,8 +2049,11 @@ namespace dxvk {
         default:
           static bool s_errorShown[256];
 
-          if (!std::exchange(s_errorShown[State], true))
-            Logger::warn(str::format("D3D9DeviceEx::SetRenderState: Unhandled render state ", State));
+          if (!std::exchange(s_errorShown[State], true)) {
+            std::ostringstream oss;
+            oss << "D3D9DeviceEx::SetRenderState: Unhandled render state " << State;
+            Logger::warn(oss.str());
+          }
           break;
       }
     }
