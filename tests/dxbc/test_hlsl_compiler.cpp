@@ -10,6 +10,10 @@
 
 #include "../test_utils.h"
 
+namespace dxvk {
+  Logger Logger::s_instance(L"hlsl-compiler.log");
+}
+
 using namespace dxvk;
 
 int WINAPI WinMain(HINSTANCE hInstance,

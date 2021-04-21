@@ -7,6 +7,10 @@
 
 #include "../test_utils.h"
 
+namespace dxvk {
+  Logger Logger::s_instance(L"dxgi-factory.log");
+}
+
 using namespace dxvk;
 
 int WINAPI WinMain(HINSTANCE hInstance,
