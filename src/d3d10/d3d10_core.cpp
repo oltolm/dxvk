@@ -38,15 +38,14 @@ extern "C" {
       return hr;
     
     Com<ID3D10Multithread> multithread;
-    d3d11Device->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&multithread));
+    d3d11Device->QueryInterface(&multithread);
     multithread->SetMultithreadProtected(!(Flags & D3D10_CREATE_DEVICE_SINGLETHREADED));
 
     Com<IDXGIDXVKDevice> dxvkDevice;
-    d3d11Device->QueryInterface(__uuidof(IDXGIDXVKDevice), reinterpret_cast<void**>(&dxvkDevice));
+    d3d11Device->QueryInterface(&dxvkDevice);
     dxvkDevice->SetAPIVersion(10);
 
-    if (FAILED(d3d11Device->QueryInterface(
-        __uuidof(ID3D10Device), reinterpret_cast<void**>(ppDevice))))
+    if (FAILED(d3d11Device->QueryInterface(ppDevice)))
       return E_FAIL;
     
     return S_OK;

@@ -30,7 +30,7 @@ extern "C" {
     Com<IDXGIDXVKAdapter> dxgiVkAdapter;
     
     // Try to find the corresponding Vulkan device for the DXGI adapter
-    if (SUCCEEDED(pAdapter->QueryInterface(__uuidof(IDXGIDXVKAdapter), reinterpret_cast<void**>(&dxgiVkAdapter)))) {
+    if (SUCCEEDED(pAdapter->QueryInterface(&dxgiVkAdapter))) {
       dxvkAdapter  = dxgiVkAdapter->GetDXVKAdapter();
       dxvkInstance = dxgiVkAdapter->GetDXVKInstance();
     } else {

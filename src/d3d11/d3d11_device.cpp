@@ -2945,8 +2945,7 @@ namespace dxvk {
       hr = m_d3d11Device.CreateTexture2D(&desc, nullptr, &texture);
 
       if (SUCCEEDED(hr)) {
-        hr = texture->QueryInterface(__uuidof(IDXGISurface),
-          reinterpret_cast<void**>(&ppSurface[i]));
+        hr = texture->QueryInterface(&ppSurface[i]);
         surfacesCreated = i + 1;
       }
 

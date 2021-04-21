@@ -21,7 +21,7 @@ namespace dxvk {
       throw DxvkError("DXGI: Failed to get adapter for present device");
     
     // Query monitor info form DXVK's DXGI factory, if available
-    m_factory->QueryInterface(__uuidof(IDXGIVkMonitorInfo), reinterpret_cast<void**>(&m_monitorInfo));
+    m_factory->QueryInterface(&m_monitorInfo);
     
     // Apply initial window mode and fullscreen state
     if (!m_descFs.Windowed && FAILED(EnterFullscreenMode(nullptr)))

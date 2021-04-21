@@ -128,9 +128,7 @@ namespace dxvk {
     
     Com<IWineDXGISwapChainFactory> wineDevice;
     
-    if (SUCCEEDED(pDevice->QueryInterface(
-          __uuidof(IWineDXGISwapChainFactory),
-          reinterpret_cast<void**>(&wineDevice)))) {
+    if (SUCCEEDED(pDevice->QueryInterface(&wineDevice))) {
       IDXGISwapChain4* frontendSwapChain;
 
       HRESULT hr = wineDevice->CreateSwapChainForHwnd(
