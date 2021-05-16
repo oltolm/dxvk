@@ -18,7 +18,7 @@ namespace dxvk {
 
     if (!::GetMonitorInfoW(hMonitor, reinterpret_cast<MONITORINFO*>(&monInfo))) {
       Logger::err("Failed to query monitor info");
-      return E_FAIL;
+      return false;
     }
 
     Logger::info(str::format("Setting display mode: ",

@@ -587,6 +587,7 @@ namespace dxvk {
     switch (Format) {
       default:
         Logger::warn(str::format("D3D11SwapChain: Unexpected format: ", m_desc.Format));
+        /* fall through */
         
       case DXGI_FORMAT_R8G8B8A8_UNORM:
       case DXGI_FORMAT_B8G8R8A8_UNORM: {

@@ -24,7 +24,7 @@ namespace dxvk::debug {
   
   std::string methodName(const std::string& prettyName);
   
-  inline void traceArgs(std::stringstream& stream) { }
+  inline void traceArgs(__attribute__((unused)) std::stringstream& stream) { }
     
   template<typename Arg1>
   void traceArgs(std::stringstream& stream, const Arg1& arg1) {

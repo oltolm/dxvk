@@ -1072,6 +1072,7 @@ namespace dxvk {
     switch (Format) {
       default:
         Logger::warn(str::format("D3D9SwapChainEx: Unexpected format: ", Format));
+        /* fall through */
         
       case D3D9Format::A8R8G8B8:
       case D3D9Format::X8R8G8B8:
@@ -1093,6 +1094,7 @@ namespace dxvk {
         pDstFormats[n++] = { VK_FORMAT_R5G5B5A1_UNORM_PACK16, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
         pDstFormats[n++] = { VK_FORMAT_A1R5G5B5_UNORM_PACK16, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
       }
+      /* fall through */
 
       case D3D9Format::R5G6B5: {
         pDstFormats[n++] = { VK_FORMAT_B5G6R5_UNORM_PACK16, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };

@@ -2045,6 +2045,7 @@ namespace dxvk {
             m_flags.set(D3D9DeviceFlag::DirtyDepthBounds);
             break;
           }
+          /* fall through */
 
         default:
           static bool s_errorShown[256];
@@ -4025,7 +4026,7 @@ namespace dxvk {
 
     bool alloced = pResource->CreateBufferSubresource(Subresource);
 
-    const Rc<DxvkBuffer> mappedBuffer = pResource->GetBuffer(Subresource);
+    Rc<DxvkBuffer> mappedBuffer = pResource->GetBuffer(Subresource);
 
     auto formatInfo = imageFormatInfo(pResource->GetFormatMapping().FormatColor);
     auto subresource = pResource->GetSubresourceFromIndex(

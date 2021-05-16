@@ -1145,6 +1145,7 @@ namespace dxvk {
             }
             return m_vs.oPSize;
         }
+        /* fall through */
 
       case DxsoRegisterType::ColorOut: {
         uint32_t idx = std::min(reg.id.num, 4u);
@@ -1882,6 +1883,7 @@ namespace dxvk {
 
           break;
         }
+        /* fall through */
       case DxsoOpcode::Exp:
         result.id = m_module.opExp2(typeId,
           emitRegisterLoad(src[0], mask).id);
