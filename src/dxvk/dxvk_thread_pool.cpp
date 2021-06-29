@@ -50,7 +50,7 @@ DxvkThreadPool::DxvkThreadPool(dxvk::ThreadPriority priority,
 
       }
     });
-    m_workerThreads[i].set_priority(priority);
+    ::SetThreadPriority(reinterpret_cast<HANDLE>(m_workerThreads[i].native_handle()), int32_t(priority));
   }
 }
 

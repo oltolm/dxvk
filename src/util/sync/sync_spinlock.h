@@ -26,7 +26,7 @@ namespace dxvk::sync {
           return;
       }
 
-      dxvk::this_thread::yield();
+      ::SwitchToThread();
     }
   }
   

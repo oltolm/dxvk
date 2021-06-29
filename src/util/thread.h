@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <thread>
 
 #include "util_error.h"
 
@@ -25,6 +26,12 @@ namespace dxvk {
     Highest     = THREAD_PRIORITY_HIGHEST,
   };
 
+  using mutex = std::mutex;
+  using recursive_mutex = std::recursive_mutex;
+  using condition_variable = std::condition_variable;
+  using thread = std::thread;
+
+#ifndef _WIN32
   /**
    * \brief Thread helper class
    * 
@@ -148,8 +155,6 @@ namespace dxvk {
       SwitchToThread();
     }
   }
-
-
   /**
    * \brief SRW-based mutex implementation
    *
@@ -322,5 +327,5 @@ namespace dxvk {
     CONDITION_VARIABLE m_cond;
 
   };
-
+#endif
 }
